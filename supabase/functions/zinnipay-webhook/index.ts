@@ -1,10 +1,25 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { hmac } from 'https://deno.land/x/hmac@v2.0.1/mod.ts'
-import { timingSafeEqual } from 'https://deno.land/std@0.168.0/crypto/timing_safe_equal.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
+async function verifyHmacSha256(secret: string, message: string, signature: string): Promise<boolean> {
+  if (!signature || signature.length % 2 !== 0) return false
+  const enc = new TextEncoder()
+  const key = await crypto.subtle.importKey(
+    'raw',
+    enc.encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['verify'],
+  )
+  const sigBytes = new Uint8Array(signature.length / 2)
+  for (let i = 0; i < signature.length; i += 2) {
+    sigBytes[i / 2] = parseInt(signature.substring(i, i + 2), 16)
+  }
+  return crypto.subtle.verify('HMAC', key, sigBytes, enc.encode(message))
 }
 
 serve(async (req) => {
@@ -19,15 +34,10 @@ serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-    const signature = req.headers.get('x-zinnipay-signature')
+    const signature = req.headers.get('x-zinnipay-signature') ?? ''
     const body = await req.text()
 
-    const expectedSig = await hmac('sha256', zinnipaySecret, body, 'utf8', 'hex')
-    const enc = new TextEncoder()
-    const sigBytes = enc.encode(signature ?? '')
-    const expBytes = enc.encode(expectedSig)
-    const valid = sigBytes.length === expBytes.length &&
-      timingSafeEqual(sigBytes, expBytes)
+    const valid = await verifyHmacSha256(zinnipaySecret, body, signature)
     if (!valid) {
       return new Response('Invalid signature', { status: 401 })
     }
