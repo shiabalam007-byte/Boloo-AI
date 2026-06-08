@@ -7,6 +7,7 @@ import '../services/streak_service.dart';
 import '../services/score_service.dart';
 import 'auth_provider.dart';
 import 'journey_provider.dart';
+import 'user_provider.dart';
 
 final conversationServiceProvider = Provider<ConversationService>(
   (ref) => ConversationService(),
@@ -104,10 +105,14 @@ class ActiveConversationNotifier extends StateNotifier<ActiveConversationState> 
       final userProfile = await _ref.read(userProfileProvider.future);
       if (userProfile == null) return null;
 
+      final curriculumDay = convo.journeyDay != null
+          ? await _ref.read(journeyServiceProvider).getDay(convo.journeyDay!)
+          : null;
+
       final mayaResponse = await _ref.read(mayaServiceProvider).sendMessage(
         messages: updatedMessages,
         userProfile: userProfile,
-        day: convo.journeyDay,
+        day: curriculumDay,
         customTopic: convo.topic,
         customScenario: convo.scenario,
       );

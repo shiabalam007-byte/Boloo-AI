@@ -1,4 +1,4 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' hide AuthException;
 import '../core/errors/app_exception.dart';
 
 class AuthService {
@@ -8,7 +8,7 @@ class AuthService {
   bool get isAuthenticated => currentUser != null;
   Stream<AuthState> get authStateChanges => _client.auth.onAuthStateChange;
 
-  Future<AuthResponse> signInWithGoogle() async {
+  Future<bool> signInWithGoogle() async {
     try {
       return await _client.auth.signInWithOAuth(
         OAuthProvider.google,

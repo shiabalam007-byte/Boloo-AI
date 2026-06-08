@@ -1,5 +1,3 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/message.dart';
 import '../models/user_profile.dart';
@@ -18,9 +16,6 @@ class MayaService {
     String? customScenario,
   }) async {
     try {
-      final session = await _client.auth.getSession();
-      final token = session.session?.accessToken;
-
       final response = await _client.functions.invoke(
         'maya-conversation',
         body: {
