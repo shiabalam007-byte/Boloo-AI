@@ -32,7 +32,7 @@ class AppTheme {
         titleTextStyle: AppTypography.h2,
         iconTheme: IconThemeData(color: AppColors.textPrimary),
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: AppColors.bg700,
         elevation: 0,
         shape: RoundedRectangleBorder(

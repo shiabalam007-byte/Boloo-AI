@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../providers/user_provider.dart';
+import '../providers/subscription_provider.dart';
 import '../features/splash/splash_screen.dart';
 import '../features/auth/auth_screen.dart';
 import '../features/auth/phone_auth_screen.dart';
@@ -19,16 +21,18 @@ import '../features/journey/journey_map_screen.dart';
 import '../features/progress/progress_screen.dart';
 import '../features/profile/profile_screen.dart';
 import '../features/settings/settings_screen.dart';
-import '../models/score.dart';
 import '../models/conversation.dart';
 
-class _AuthNotifier extends ChangeNotifier {
-  _AuthNotifier() {
+class _AppGateNotifier extends ChangeNotifier {
+  _AppGateNotifier() {
     _sub = Supabase.instance.client.auth.onAuthStateChange.listen((_) {
       notifyListeners();
     });
   }
   late final StreamSubscription _sub;
+
+  void refresh() => notifyListeners();
+
   @override
   void dispose() {
     _sub.cancel();
@@ -36,22 +40,51 @@ class _AuthNotifier extends ChangeNotifier {
   }
 }
 
+// Routes that authenticated users can access without a subscription.
+const _kFreeRoutes = ['/onboarding', '/meet-maya', '/paywall', '/settings', '/splash'];
+
 final routerProvider = Provider<GoRouter>((ref) {
-  final authNotifier = _AuthNotifier();
-  ref.onDispose(authNotifier.dispose);
+  final gateNotifier = _AppGateNotifier();
+  ref.onDispose(gateNotifier.dispose);
+
+  // Refresh the router whenever profile or subscription state changes
+  // so the redirect re-evaluates after async data loads.
+  ref.listen(userProfileNotifierProvider, (_, __) => gateNotifier.refresh());
+  ref.listen(hasSubscriptionProvider, (_, __) => gateNotifier.refresh());
 
   return GoRouter(
     initialLocation: '/splash',
-    refreshListenable: authNotifier,
+    refreshListenable: gateNotifier,
     redirect: (context, state) {
       final user = Supabase.instance.client.auth.currentUser;
       final isAuth = user != null;
-      final isAuthRoute = state.matchedLocation.startsWith('/auth');
-      final isSplash = state.matchedLocation == '/splash';
+      final loc = state.matchedLocation;
 
-      if (isSplash) return null;
-      if (!isAuth && !isAuthRoute) return '/auth';
-      if (isAuth && isAuthRoute) return '/dashboard';
+      if (loc == '/splash') return null;
+
+      // Not authenticated — send to auth unless already there.
+      if (!isAuth) {
+        return loc.startsWith('/auth') ? null : '/auth';
+      }
+
+      // Authenticated on an auth route — decide where to send them.
+      if (loc.startsWith('/auth')) {
+        final profile = ref.read(userProfileNotifierProvider).value;
+        if (profile == null) return '/dashboard'; // profile loading
+        if (!profile.onboardingCompleted) return '/onboarding';
+        final hasSub = ref.read(hasSubscriptionProvider).value ?? true;
+        return hasSub ? '/dashboard' : '/paywall';
+      }
+
+      // Free routes — always allow.
+      if (_kFreeRoutes.any((r) => loc.startsWith(r))) return null;
+
+      // Protected routes — check onboarding then subscription.
+      final profile = ref.read(userProfileNotifierProvider).value;
+      if (profile != null && !profile.onboardingCompleted) return '/onboarding';
+
+      final hasSubAsync = ref.read(hasSubscriptionProvider);
+      if (hasSubAsync.hasValue && hasSubAsync.value == false) return '/paywall';
 
       return null;
     },

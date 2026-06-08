@@ -1,9 +1,9 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { hmac } from 'https://deno.land/x/hmac@v2.0.1/mod.ts'
+import { timingSafeEqual } from 'https://deno.land/std@0.168.0/crypto/timing_safe_equal.ts'
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
@@ -23,7 +23,12 @@ serve(async (req) => {
     const body = await req.text()
 
     const expectedSig = await hmac('sha256', zinnipaySecret, body, 'utf8', 'hex')
-    if (signature !== expectedSig) {
+    const enc = new TextEncoder()
+    const sigBytes = enc.encode(signature ?? '')
+    const expBytes = enc.encode(expectedSig)
+    const valid = sigBytes.length === expBytes.length &&
+      timingSafeEqual(sigBytes, expBytes)
+    if (!valid) {
       return new Response('Invalid signature', { status: 401 })
     }
 

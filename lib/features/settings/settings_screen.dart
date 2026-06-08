@@ -2,12 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 import '../../app/theme/colors.dart';
 import '../../app/theme/typography.dart';
 import '../../app/theme/dimensions.dart';
 import '../../core/constants/storage_keys.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/user_provider.dart';
+
+const _kPrivacyPolicyUrl = 'https://boolooai.com/privacy';
+const _kTermsUrl = 'https://boolooai.com/terms';
+const _kFaqUrl = 'https://boolooai.com/faq';
+const _kSupportEmail = 'support@boolooai.com';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -114,6 +120,32 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
+  void _openWebPage(BuildContext context, String title, String url) {
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => _WebPageScreen(title: title, url: url),
+    ));
+  }
+
+  void _contactSupport(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.bg700,
+        title: const Text('Contact Support', style: AppTypography.h3),
+        content: Text(
+          'Email us at $_kSupportEmail\n\nWe respond within 24 hours.',
+          style: AppTypography.body,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _signOut() async {
     final confirm = await showDialog<bool>(
       context: context,
@@ -214,7 +246,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               _ListTile(
                 icon: Icons.card_membership_outlined,
                 label: 'Manage Subscription',
-                onTap: () {},
+                onTap: () => _openWebPage(context, 'Manage Subscription', _kPrivacyPolicyUrl),
               ),
             ],
           ),
@@ -224,12 +256,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               _ListTile(
                 icon: Icons.help_outline_rounded,
                 label: 'Help & FAQ',
-                onTap: () {},
+                onTap: () => _openWebPage(context, 'Help & FAQ', _kFaqUrl),
               ),
               _ListTile(
                 icon: Icons.email_outlined,
                 label: 'Contact Support',
-                onTap: () {},
+                onTap: () => _contactSupport(context),
               ),
             ],
           ),
@@ -239,12 +271,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               _ListTile(
                 icon: Icons.privacy_tip_outlined,
                 label: 'Privacy Policy',
-                onTap: () {},
+                onTap: () => _openWebPage(context, 'Privacy Policy', _kPrivacyPolicyUrl),
               ),
               _ListTile(
                 icon: Icons.article_outlined,
                 label: 'Terms of Service',
-                onTap: () {},
+                onTap: () => _openWebPage(context, 'Terms of Service', _kTermsUrl),
               ),
             ],
           ),
@@ -363,6 +395,44 @@ class _ListTile extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _WebPageScreen extends StatefulWidget {
+  const _WebPageScreen({required this.title, required this.url});
+
+  final String title;
+  final String url;
+
+  @override
+  State<_WebPageScreen> createState() => _WebPageScreenState();
+}
+
+class _WebPageScreenState extends State<_WebPageScreen> {
+  late final WebViewController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..loadRequest(Uri.parse(widget.url));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.bg900,
+      appBar: AppBar(
+        backgroundColor: AppColors.bg900,
+        title: Text(widget.title, style: AppTypography.h3),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ),
+      body: WebViewWidget(controller: _controller),
     );
   }
 }
