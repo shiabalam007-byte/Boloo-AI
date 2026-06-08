@@ -17,6 +17,7 @@ class PaymentService {
     try {
       final paymentId = _uuid.v4();
 
+      // Insert payment record — zinipay_invoice_id is populated by the edge function
       await _client.from('payments').insert({
         'id': paymentId,
         'user_id': userId,
@@ -29,16 +30,20 @@ class PaymentService {
         body: {
           'paymentId': paymentId,
           'userId': userId,
-          'amountPaisa': AppConstants.acceleratorPriceBDT * 100,
+          'amountBdt': AppConstants.acceleratorPriceBDT,
           'customerName': userName,
           'customerEmail': userEmail,
-          'customerPhone': userPhone ?? '',
         },
       );
 
       if (response.data == null) throw PaymentException('Payment initiation failed');
-      return response.data as Map<String, dynamic>;
+
+      final data = response.data as Map<String, dynamic>;
+      if (data['error'] != null) throw PaymentException(data['error'] as String);
+
+      return data;
     } catch (e) {
+      if (e is PaymentException) rethrow;
       throw PaymentException(e.toString());
     }
   }

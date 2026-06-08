@@ -267,12 +267,15 @@ class _PaymentWebViewState extends State<PaymentWebView> {
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setNavigationDelegate(NavigationDelegate(
         onNavigationRequest: (request) {
-          if (request.url.startsWith('boloo://payment/return')) {
-            widget.onSuccess();
-            return NavigationDecision.prevent;
-          }
-          if (request.url.startsWith('boloo://payment/cancel')) {
-            widget.onCancel();
+          // ZiniPay redirects to the Supabase payment-return function
+          if (request.url.contains('/payment-return')) {
+            final uri = Uri.tryParse(request.url);
+            final status = uri?.queryParameters['status'] ?? 'cancel';
+            if (status == 'success') {
+              widget.onSuccess();
+            } else {
+              widget.onCancel();
+            }
             return NavigationDecision.prevent;
           }
           return NavigationDecision.navigate;
