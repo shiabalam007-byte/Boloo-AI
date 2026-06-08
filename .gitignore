@@ -67,3 +67,9 @@ supabase/.temp
 
 # macOS
 .DS_Store
+node_modules/
+screenshots/
+build/
+debug_web.js
+screenshot_verify.js
+screenshot_auth_subs.js
