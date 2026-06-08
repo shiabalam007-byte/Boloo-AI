@@ -19,12 +19,12 @@ class JourneyMapScreen extends ConsumerWidget {
     final currentDay = profileAsync.value?.currentDay ?? 1;
 
     return Scaffold(
-      backgroundColor: AppColors.bg900,
+      backgroundColor: AppColors.bgPage,
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
             floating: true,
-            backgroundColor: AppColors.bg900,
+            backgroundColor: AppColors.bgPage,
             title: const Text('Your Journey', style: AppTypography.h2),
             bottom: PreferredSize(
               preferredSize: const Size.fromHeight(48),
@@ -39,7 +39,7 @@ class JourneyMapScreen extends ConsumerWidget {
                         borderRadius: BorderRadius.circular(4),
                         child: LinearProgressIndicator(
                           value: currentDay / 30,
-                          backgroundColor: AppColors.bg500,
+                          backgroundColor: AppColors.borderSubtle,
                           valueColor: const AlwaysStoppedAnimation(AppColors.brandPurple),
                           minHeight: 6,
                         ),
@@ -215,13 +215,13 @@ class _DayCard extends StatelessWidget {
           color: isCurrent
               ? AppColors.brandPurple.withOpacity(0.15)
               : isLocked
-                  ? AppColors.bg800
-                  : AppColors.bg700,
+                  ? AppColors.bgPage
+                  : AppColors.bgSurface,
           borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
           border: Border.all(
             color: isCurrent
                 ? AppColors.brandPurple
-                : AppColors.bg500,
+                : AppColors.borderSubtle,
             width: isCurrent ? 2 : 1,
           ),
         ),
@@ -276,7 +276,7 @@ class _DayCard extends StatelessWidget {
             ? AppColors.success.withOpacity(0.15)
             : isCurrent
                 ? AppColors.brandPurple
-                : AppColors.bg600,
+                : AppColors.bgSurface2,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Center(

@@ -35,7 +35,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bg900,
+      backgroundColor: AppColors.bgPage,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(AppDimensions.lg),
@@ -56,20 +56,28 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   Widget _buildHeroSection() {
     return Column(
       children: [
+        // Maya avatar placeholder — will be replaced with 3D character in Phase 2B
         Container(
-          width: 96,
-          height: 96,
+          width: 100,
+          height: 100,
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [AppColors.brandPurple, AppColors.teal],
+              colors: [AppColors.blue, AppColors.brandPurple],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
-            borderRadius: BorderRadius.circular(28),
+            borderRadius: BorderRadius.circular(30),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.blue.withOpacity(0.25),
+                blurRadius: 24,
+                offset: const Offset(0, 8),
+              ),
+            ],
           ),
           child: const Center(
             child: Text(
-              'B',
+              'M',
               style: TextStyle(
                 fontFamily: 'PlusJakartaSans',
                 fontSize: 52,
@@ -88,7 +96,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
         const SizedBox(height: AppDimensions.sm),
         Text(
           'Unlock Opportunities.',
-          style: AppTypography.h2.copyWith(color: AppColors.lightPurple),
+          style: AppTypography.h2.copyWith(color: AppColors.blue),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: AppDimensions.md),
@@ -97,7 +105,30 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
           style: AppTypography.body.copyWith(color: AppColors.textSecondary),
           textAlign: TextAlign.center,
         ),
+        const SizedBox(height: AppDimensions.lg),
+        _buildTrustRow(),
       ],
+    );
+  }
+
+  Widget _buildTrustRow() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: AppDimensions.md, vertical: AppDimensions.sm),
+      decoration: BoxDecoration(
+        color: AppColors.blueLight,
+        borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.people_rounded, color: AppColors.blue, size: 16),
+          const SizedBox(width: 6),
+          Text(
+            '1,200+ Bangladeshis improving their English',
+            style: AppTypography.caption.copyWith(color: AppColors.blue),
+          ),
+        ],
+      ),
     );
   }
 

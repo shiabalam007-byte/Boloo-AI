@@ -85,8 +85,8 @@ class BoolooButton extends StatelessWidget {
             onPressed: disabled ? null : onPressed,
             style: ElevatedButton.styleFrom(
               backgroundColor: disabled
-                  ? AppColors.brandPurple.withOpacity(0.4)
-                  : AppColors.brandPurple,
+                  ? AppColors.blue.withOpacity(0.4)
+                  : AppColors.blue,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
@@ -99,7 +99,7 @@ class BoolooButton extends StatelessWidget {
             onPressed: disabled ? null : onPressed,
             style: OutlinedButton.styleFrom(
               foregroundColor: AppColors.textPrimary,
-              side: const BorderSide(color: AppColors.bg500),
+              side: const BorderSide(color: AppColors.borderMedium),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
               ),

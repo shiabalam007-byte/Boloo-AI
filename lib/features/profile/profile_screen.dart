@@ -19,14 +19,15 @@ class ProfileScreen extends ConsumerWidget {
     final streakAsync = ref.watch(streakProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.bg900,
+      backgroundColor: AppColors.bgPage,
       body: CustomScrollView(
         slivers: [
-          const SliverAppBar(
+          SliverAppBar(
             floating: true,
-            backgroundColor: AppColors.bg900,
-            title: Text('Profile', style: AppTypography.h2),
-            actions: [
+            backgroundColor: AppColors.bgPage,
+            elevation: 0,
+            title: const Text('Profile', style: AppTypography.h2),
+            actions: const [
               _SettingsButton(),
             ],
           ),
@@ -120,7 +121,7 @@ class _ProfileHeader extends StatelessWidget {
           height: 72,
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [AppColors.brandPurple, AppColors.teal],
+              colors: [AppColors.blue, AppColors.brandPurple],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -153,12 +154,12 @@ class _ProfileHeader extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                 decoration: BoxDecoration(
-                  color: AppColors.brandPurple.withOpacity(0.15),
+                  color: AppColors.blueLight,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
                   'Day ${profile.currentDay} of 90',
-                  style: AppTypography.micro.copyWith(color: AppColors.lightPurple),
+                  style: AppTypography.micro.copyWith(color: AppColors.blue),
                 ),
               ),
             ],
@@ -179,9 +180,9 @@ class _StreakCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppDimensions.md),
       decoration: BoxDecoration(
-        color: AppColors.warning.withOpacity(0.08),
+        color: AppColors.warning.withOpacity(0.06),
         borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-        border: Border.all(color: AppColors.warning.withOpacity(0.25)),
+        border: Border.all(color: AppColors.warning.withOpacity(0.2)),
       ),
       child: Row(
         children: [
@@ -218,9 +219,16 @@ class _StatsCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppDimensions.md),
       decoration: BoxDecoration(
-        color: AppColors.bg700,
+        color: AppColors.bgSurface,
         borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-        border: Border.all(color: AppColors.bg500),
+        border: Border.all(color: AppColors.borderSubtle),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         children: [
@@ -253,7 +261,7 @@ class _VerticalDivider extends StatelessWidget {
     return Container(
       width: 1,
       height: 40,
-      color: AppColors.bg500,
+      color: AppColors.borderSubtle,
       margin: const EdgeInsets.symmetric(horizontal: AppDimensions.md),
     );
   }
@@ -275,7 +283,7 @@ class _StatItem extends StatelessWidget {
     return Expanded(
       child: Column(
         children: [
-          Icon(icon, color: AppColors.lightPurple, size: 20),
+          Icon(icon, color: AppColors.blue, size: 20),
           const SizedBox(height: 4),
           Text(value, style: AppTypography.h3),
           Text(label, style: AppTypography.micro),
@@ -302,9 +310,16 @@ class _LearningPreferences extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppDimensions.md),
       decoration: BoxDecoration(
-        color: AppColors.bg700,
+        color: AppColors.bgSurface,
         borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-        border: Border.all(color: AppColors.bg500),
+        border: Border.all(color: AppColors.borderSubtle),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -374,7 +389,7 @@ class _ProfileHeaderSkeleton extends StatelessWidget {
           width: 72,
           height: 72,
           decoration: const BoxDecoration(
-            color: AppColors.bg700,
+            color: AppColors.bgSurface2,
             shape: BoxShape.circle,
           ),
         ),
@@ -395,7 +410,7 @@ class _SkeletonBox extends StatelessWidget {
     return Container(
       height: height,
       decoration: BoxDecoration(
-        color: AppColors.bg700,
+        color: AppColors.bgSurface2,
         borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
       ),
     );

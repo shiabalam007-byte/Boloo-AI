@@ -61,7 +61,7 @@ class _MeetMayaScreenState extends ConsumerState<MeetMayaScreen>
     final name = profile.value?.fullName?.split(' ').first ?? 'there';
 
     return Scaffold(
-      backgroundColor: AppColors.bg900,
+      backgroundColor: AppColors.bgPage,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(AppDimensions.lg),

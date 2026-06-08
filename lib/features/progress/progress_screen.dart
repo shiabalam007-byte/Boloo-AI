@@ -20,13 +20,14 @@ class ProgressScreen extends ConsumerWidget {
     final profile = ref.watch(userProfileNotifierProvider).value;
 
     return Scaffold(
-      backgroundColor: AppColors.bg900,
+      backgroundColor: AppColors.bgPage,
       body: CustomScrollView(
         slivers: [
-          const SliverAppBar(
+          SliverAppBar(
             floating: true,
-            backgroundColor: AppColors.bg900,
-            title: Text('Your Progress', style: AppTypography.h2),
+            backgroundColor: AppColors.bgPage,
+            elevation: 0,
+            title: const Text('Your Progress', style: AppTypography.h2),
           ),
           SliverPadding(
             padding: const EdgeInsets.all(AppDimensions.lg),
@@ -106,14 +107,20 @@ class _StatCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(AppDimensions.md),
         decoration: BoxDecoration(
-          color: AppColors.bg700,
+          color: AppColors.bgSurface,
           borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
-          border: Border.all(color: AppColors.bg500),
+          border: Border.all(color: AppColors.borderSubtle),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Column(
           children: [
             Text(value, style: AppTypography.h1.copyWith(
-              color: AppColors.textPrimary,
               fontFamily: 'DMMonoMedium',
             )),
             Text(label, style: AppTypography.caption),
@@ -136,9 +143,9 @@ class _AverageScoresCard extends StatelessWidget {
       return Container(
         padding: const EdgeInsets.all(AppDimensions.lg),
         decoration: BoxDecoration(
-          color: AppColors.bg700,
+          color: AppColors.bgSurface,
           borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-          border: Border.all(color: AppColors.bg500),
+          border: Border.all(color: AppColors.borderSubtle),
         ),
         child: const Center(
           child: Text('Complete sessions to see your scores',
@@ -150,14 +157,21 @@ class _AverageScoresCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppDimensions.md),
       decoration: BoxDecoration(
-        color: AppColors.bg700,
+        color: AppColors.bgSurface,
         borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-        border: Border.all(color: AppColors.bg500),
+        border: Border.all(color: AppColors.borderSubtle),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Average Scores', style: AppTypography.h3),
+          const Text('Average Scores', style: AppTypography.h3),
           const SizedBox(height: AppDimensions.md),
           _ScoreBar(label: 'Confidence', value: scores['confidence'] ?? 0),
           const SizedBox(height: AppDimensions.sm),
@@ -190,7 +204,7 @@ class _ScoreBar extends StatelessWidget {
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
               value: value / 100,
-              backgroundColor: AppColors.bg500,
+              backgroundColor: AppColors.bgSurface2,
               valueColor: AlwaysStoppedAnimation(color),
               minHeight: 8,
             ),
@@ -225,14 +239,21 @@ class _ScoreChart extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppDimensions.md),
       decoration: BoxDecoration(
-        color: AppColors.bg700,
+        color: AppColors.bgSurface,
         borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-        border: Border.all(color: AppColors.bg500),
+        border: Border.all(color: AppColors.borderSubtle),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Overall Score Trend', style: AppTypography.h3),
+          const Text('Overall Score Trend', style: AppTypography.h3),
           const SizedBox(height: AppDimensions.md),
           SizedBox(
             height: 180,
@@ -241,7 +262,7 @@ class _ScoreChart extends StatelessWidget {
                 gridData: FlGridData(
                   show: true,
                   getDrawingHorizontalLine: (_) => const FlLine(
-                    color: AppColors.bg500,
+                    color: AppColors.borderSubtle,
                     strokeWidth: 1,
                   ),
                   drawVerticalLine: false,
@@ -277,12 +298,12 @@ class _ScoreChart extends StatelessWidget {
                       e.value.overallScore,
                     )).toList(),
                     isCurved: true,
-                    color: AppColors.brandPurple,
+                    color: AppColors.blue,
                     barWidth: 2.5,
                     dotData: const FlDotData(show: false),
                     belowBarData: BarAreaData(
                       show: true,
-                      color: AppColors.brandPurple.withOpacity(0.1),
+                      color: AppColors.blue.withOpacity(0.08),
                     ),
                   ),
                 ],
@@ -305,15 +326,15 @@ class _RecentScoresList extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Session History', style: AppTypography.h3),
+        const Text('Session History', style: AppTypography.h3),
         const SizedBox(height: AppDimensions.md),
         ...history.map((s) => Container(
           margin: const EdgeInsets.only(bottom: AppDimensions.sm),
           padding: const EdgeInsets.all(AppDimensions.md),
           decoration: BoxDecoration(
-            color: AppColors.bg700,
+            color: AppColors.bgSurface,
             borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
-            border: Border.all(color: AppColors.bg500),
+            border: Border.all(color: AppColors.borderSubtle),
           ),
           child: Row(
             children: [
@@ -352,7 +373,7 @@ class _ScorePill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withOpacity(0.12),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
@@ -374,9 +395,9 @@ class _EmptyProgressCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppDimensions.xl),
       decoration: BoxDecoration(
-        color: AppColors.bg700,
+        color: AppColors.bgSurface,
         borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-        border: Border.all(color: AppColors.bg500),
+        border: Border.all(color: AppColors.borderSubtle),
       ),
       child: Column(
         children: [
@@ -408,7 +429,7 @@ class _SkeletonBox extends StatelessWidget {
     return Container(
       height: height,
       decoration: BoxDecoration(
-        color: AppColors.bg700,
+        color: AppColors.bgSurface2,
         borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
       ),
     );

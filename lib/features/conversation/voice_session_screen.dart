@@ -112,24 +112,39 @@ class _VoiceSessionScreenState extends ConsumerState<VoiceSessionScreen>
         ? messages.lastWhere((m) => m.isMaya).content
         : null;
 
+    final isSpeaking = _voiceState == VoiceState.speaking;
+    final isListening = _voiceState == VoiceState.listening;
+
     return Scaffold(
-      backgroundColor: AppColors.bg900,
+      backgroundColor: AppColors.bgPage,
       body: SafeArea(
         child: Column(
           children: [
             _buildTopBar(state.conversation?.topic ?? 'Practice Session'),
-            const Spacer(),
-            _buildMayaSection(
-              isMayaTyping: state.isMayaTyping,
-              isSpeaking: _voiceState == VoiceState.speaking,
-              lastMessage: lastMayaMessage,
+            Expanded(
+              flex: 5,
+              child: _buildMayaSection(
+                isMayaTyping: state.isMayaTyping,
+                isSpeaking: isSpeaking,
+                isListening: isListening,
+                lastMessage: lastMayaMessage,
+              ),
             ),
-            const SizedBox(height: AppDimensions.xl),
-            if (_liveTranscript.isNotEmpty) _buildLiveTranscript(),
-            const SizedBox(height: AppDimensions.xl),
-            _buildMicButton(),
-            const SizedBox(height: AppDimensions.xl),
-            _buildStatusLabel(),
+            Expanded(
+              flex: 4,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (_liveTranscript.isNotEmpty) ...[
+                    _buildLiveTranscript(),
+                    const SizedBox(height: AppDimensions.lg),
+                  ],
+                  _buildMicButton(),
+                  const SizedBox(height: AppDimensions.md),
+                  _buildStatusLabel(),
+                ],
+              ),
+            ),
             const SizedBox(height: AppDimensions.md),
           ],
         ),
@@ -174,42 +189,81 @@ class _VoiceSessionScreenState extends ConsumerState<VoiceSessionScreen>
   Widget _buildMayaSection({
     required bool isMayaTyping,
     required bool isSpeaking,
+    required bool isListening,
     required String? lastMessage,
   }) {
     return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          width: isSpeaking ? 110 : 96,
-          height: isSpeaking ? 110 : 96,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [AppColors.brandPurple, AppColors.teal],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            shape: BoxShape.circle,
-            boxShadow: isSpeaking
-                ? [
-                    BoxShadow(
-                      color: AppColors.brandPurple.withOpacity(0.5),
-                      blurRadius: 32,
-                      spreadRadius: 8,
+        // Maya avatar with animated state rings
+        Stack(
+          alignment: Alignment.center,
+          children: [
+            // Outer glow ring when speaking
+            if (isSpeaking)
+              AnimatedBuilder(
+                animation: _pulseAnim,
+                builder: (_, __) => Container(
+                  width: 140 * _pulseAnim.value,
+                  height: 140 * _pulseAnim.value,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: AppColors.blue.withOpacity(0.15),
+                      width: 2,
                     ),
-                  ]
-                : [],
-          ),
-          child: const Center(
-            child: Text(
-              'M',
-              style: TextStyle(
-                fontFamily: 'PlusJakartaSans',
-                fontSize: 44,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
+                  ),
+                ),
+              ),
+            // Listening ring
+            if (isListening)
+              AnimatedBuilder(
+                animation: _pulseAnim,
+                builder: (_, __) => Container(
+                  width: 130 * _pulseAnim.value,
+                  height: 130 * _pulseAnim.value,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: AppColors.error.withOpacity(0.2),
+                      width: 2,
+                    ),
+                  ),
+                ),
+              ),
+            // Maya avatar
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              width: isSpeaking ? 112 : 100,
+              height: isSpeaking ? 112 : 100,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [AppColors.blue, AppColors.brandPurple],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.blue.withOpacity(isSpeaking ? 0.4 : 0.2),
+                    blurRadius: isSpeaking ? 32 : 16,
+                    spreadRadius: isSpeaking ? 4 : 0,
+                  ),
+                ],
+              ),
+              child: const Center(
+                child: Text(
+                  'M',
+                  style: TextStyle(
+                    fontFamily: 'PlusJakartaSans',
+                    fontSize: 44,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
               ),
             ),
-          ),
+          ],
         ),
         const SizedBox(height: AppDimensions.lg),
         if (isMayaTyping)
@@ -228,8 +282,12 @@ class _VoiceSessionScreenState extends ConsumerState<VoiceSessionScreen>
         vertical: AppDimensions.mdMinus,
       ),
       decoration: BoxDecoration(
-        color: AppColors.bg700,
+        color: AppColors.bgSurface,
         borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
+        border: Border.all(color: AppColors.borderSubtle),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 6),
+        ],
       ),
       child: const Row(
         mainAxisSize: MainAxisSize.min,
@@ -247,9 +305,16 @@ class _VoiceSessionScreenState extends ConsumerState<VoiceSessionScreen>
       margin: const EdgeInsets.symmetric(horizontal: AppDimensions.lg),
       padding: const EdgeInsets.all(AppDimensions.md),
       decoration: BoxDecoration(
-        color: AppColors.bg700,
+        color: AppColors.bgSurface,
         borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-        border: Border.all(color: AppColors.bg500),
+        border: Border.all(color: AppColors.borderSubtle),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Text(
         text.length > 200 ? '${text.substring(0, 200)}...' : text,
@@ -264,13 +329,13 @@ class _VoiceSessionScreenState extends ConsumerState<VoiceSessionScreen>
       margin: const EdgeInsets.symmetric(horizontal: AppDimensions.lg),
       padding: const EdgeInsets.all(AppDimensions.md),
       decoration: BoxDecoration(
-        color: AppColors.brandPurple.withOpacity(0.1),
+        color: AppColors.blueLight,
         borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
-        border: Border.all(color: AppColors.brandPurple.withOpacity(0.3)),
+        border: Border.all(color: AppColors.blue.withOpacity(0.2)),
       ),
       child: Text(
         _liveTranscript,
-        style: AppTypography.body.copyWith(color: AppColors.lightPurple),
+        style: AppTypography.body.copyWith(color: AppColors.blue),
         textAlign: TextAlign.center,
       ),
     );
@@ -299,22 +364,23 @@ class _VoiceSessionScreenState extends ConsumerState<VoiceSessionScreen>
             color: isListening
                 ? AppColors.error
                 : isDisabled
-                    ? AppColors.bg600
-                    : AppColors.brandPurple,
+                    ? AppColors.bgSurface2
+                    : AppColors.blue,
             shape: BoxShape.circle,
-            boxShadow: isListening
-                ? [
+            boxShadow: isDisabled
+                ? []
+                : [
                     BoxShadow(
-                      color: AppColors.error.withOpacity(0.4),
-                      blurRadius: 24,
-                      spreadRadius: 4,
+                      color: (isListening ? AppColors.error : AppColors.blue)
+                          .withOpacity(0.35),
+                      blurRadius: 20,
+                      spreadRadius: isListening ? 4 : 0,
                     ),
-                  ]
-                : [],
+                  ],
           ),
           child: Icon(
             isListening ? Icons.stop_rounded : Icons.mic_rounded,
-            color: Colors.white,
+            color: isDisabled ? AppColors.textTertiary : Colors.white,
             size: 36,
           ),
         ),
@@ -327,9 +393,16 @@ class _VoiceSessionScreenState extends ConsumerState<VoiceSessionScreen>
       VoiceState.listening => 'Listening... tap to stop',
       VoiceState.speaking => 'Maya is speaking...',
       VoiceState.processing => 'Processing...',
-      VoiceState.idle => 'Tap mic to speak',
+      VoiceState.idle => 'Tap to speak',
     };
-    return Text(label, style: AppTypography.caption);
+    return Text(
+      label,
+      style: AppTypography.caption.copyWith(
+        color: _voiceState == VoiceState.listening
+            ? AppColors.error
+            : AppColors.textTertiary,
+      ),
+    );
   }
 }
 

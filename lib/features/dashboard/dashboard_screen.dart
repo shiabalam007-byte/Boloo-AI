@@ -23,7 +23,7 @@ class DashboardScreen extends ConsumerWidget {
     final recentAsync = ref.watch(recentSessionsProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.bg900,
+      backgroundColor: AppColors.bgPage,
       body: CustomScrollView(
         slivers: [
           _buildAppBar(ref, profileAsync.value?.currentDay ?? 1,
@@ -76,7 +76,7 @@ class DashboardScreen extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push('/session/setup'),
-        backgroundColor: AppColors.brandPurple,
+        backgroundColor: AppColors.blue,
         icon: const Icon(Icons.mic_rounded, color: Colors.white),
         label: const Text('Practice Now', style: TextStyle(
           fontFamily: 'PlusJakartaSans',
@@ -90,20 +90,24 @@ class DashboardScreen extends ConsumerWidget {
   SliverAppBar _buildAppBar(WidgetRef ref, int day, int streak) {
     return SliverAppBar(
       floating: true,
-      backgroundColor: AppColors.bg900,
+      backgroundColor: AppColors.bgPage,
       title: Row(
         children: [
-          const Text('BOLOO AI', style: AppTypography.h2),
+          Text(
+            'BOLOO',
+            style: AppTypography.h2.copyWith(color: AppColors.blue),
+          ),
+          Text(' AI', style: AppTypography.h2),
           const Spacer(),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             decoration: BoxDecoration(
-              color: AppColors.bg700,
+              color: AppColors.blueLight,
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
               'Day $day',
-              style: AppTypography.caption.copyWith(color: AppColors.lightPurple),
+              style: AppTypography.caption.copyWith(color: AppColors.blue),
             ),
           ),
           const SizedBox(width: 8),
@@ -111,7 +115,7 @@ class DashboardScreen extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: AppColors.warning.withOpacity(0.15),
+                color: AppColors.warning.withOpacity(0.12),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Row(
@@ -157,15 +161,19 @@ class _MayaGreetingCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(AppDimensions.lg),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              AppColors.brandPurple.withOpacity(0.9),
-              AppColors.teal.withOpacity(0.7),
-            ],
+          gradient: const LinearGradient(
+            colors: [AppColors.blue, AppColors.brandPurple],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(AppDimensions.radiusHero),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.blue.withOpacity(0.3),
+              blurRadius: 20,
+              offset: const Offset(0, 6),
+            ),
+          ],
         ),
         child: Row(
           children: [
@@ -173,7 +181,7 @@ class _MayaGreetingCard extends StatelessWidget {
               width: 56,
               height: 56,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withOpacity(0.25),
                 shape: BoxShape.circle,
               ),
               child: const Center(
@@ -197,7 +205,7 @@ class _MayaGreetingCard extends StatelessWidget {
                   Text(
                     'Ready for Day $day? Let\'s practice!',
                     style: AppTypography.caption.copyWith(
-                      color: Colors.white.withOpacity(0.8),
+                      color: Colors.white.withOpacity(0.85),
                     ),
                   ),
                 ],
@@ -225,9 +233,16 @@ class _TodayChallengeCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(AppDimensions.md),
         decoration: BoxDecoration(
-          color: AppColors.bg700,
+          color: AppColors.bgSurface,
           borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-          border: Border.all(color: AppColors.bg500),
+          border: Border.all(color: AppColors.borderSubtle),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Row(
           children: [
@@ -235,7 +250,7 @@ class _TodayChallengeCard extends StatelessWidget {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: AppColors.teal.withOpacity(0.15),
+                color: AppColors.teal.withOpacity(0.12),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Center(
@@ -260,7 +275,7 @@ class _TodayChallengeCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: AppColors.brandPurple,
+                color: AppColors.blue,
                 borderRadius: BorderRadius.circular(20),
               ),
               child: const Text('Start', style: TextStyle(
@@ -288,9 +303,9 @@ class _ScoreRow extends StatelessWidget {
       return Container(
         padding: const EdgeInsets.all(AppDimensions.md),
         decoration: BoxDecoration(
-          color: AppColors.bg700,
+          color: AppColors.bgSurface,
           borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-          border: Border.all(color: AppColors.bg500),
+          border: Border.all(color: AppColors.borderSubtle),
         ),
         child: Row(
           children: [
@@ -330,9 +345,16 @@ class _ScoreChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(AppDimensions.md),
         decoration: BoxDecoration(
-          color: AppColors.bg700,
+          color: AppColors.bgSurface,
           borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
-          border: Border.all(color: AppColors.bg500),
+          border: Border.all(color: AppColors.borderSubtle),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Column(
           children: [
@@ -370,9 +392,16 @@ class _SessionCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: AppDimensions.sm),
       padding: const EdgeInsets.all(AppDimensions.md),
       decoration: BoxDecoration(
-        color: AppColors.bg700,
+        color: AppColors.bgSurface,
         borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
-        border: Border.all(color: AppColors.bg500),
+        border: Border.all(color: AppColors.borderSubtle),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         children: [
@@ -380,12 +409,12 @@ class _SessionCard extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: AppColors.brandPurple.withOpacity(0.15),
+              color: AppColors.blueLight,
               borderRadius: BorderRadius.circular(10),
             ),
             child: const Center(
               child: Icon(Icons.chat_bubble_outline_rounded,
-                  color: AppColors.lightPurple, size: 18),
+                  color: AppColors.blue, size: 18),
             ),
           ),
           const SizedBox(width: AppDimensions.md),
@@ -405,7 +434,7 @@ class _SessionCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: AppColors.scoreColor(conversation.overallScore!).withOpacity(0.15),
+                color: AppColors.scoreColor(conversation.overallScore!).withOpacity(0.12),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
@@ -443,11 +472,9 @@ class _EmptySessionsCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(AppDimensions.xl),
         decoration: BoxDecoration(
-          color: AppColors.bg700,
+          color: AppColors.bgSurface,
           borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-          border: Border.all(
-            color: AppColors.brandPurple.withOpacity(0.3),
-          ),
+          border: Border.all(color: AppColors.blue.withOpacity(0.2)),
         ),
         child: Column(
           children: [
@@ -480,7 +507,7 @@ class _CardSkeleton extends StatelessWidget {
     return Container(
       height: height,
       decoration: BoxDecoration(
-        color: AppColors.bg700,
+        color: AppColors.bgSurface2,
         borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
       ),
     );

@@ -71,9 +71,9 @@ class _PhoneAuthScreenState extends ConsumerState<PhoneAuthScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bg900,
+      backgroundColor: AppColors.bgPage,
       appBar: AppBar(
-        backgroundColor: AppColors.bg900,
+        backgroundColor: AppColors.bgPage,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => context.pop(),
@@ -105,10 +105,10 @@ class _PhoneAuthScreenState extends ConsumerState<PhoneAuthScreen> {
                       vertical: AppDimensions.mdMinus,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.bg600,
+                      color: AppColors.bgSurface2,
                       borderRadius:
                           BorderRadius.circular(AppDimensions.radiusMd),
-                      border: Border.all(color: AppColors.bg500),
+                      border: Border.all(color: AppColors.borderSubtle),
                     ),
                     child: Text('+880', style: AppTypography.bodyLarge),
                   ),

@@ -62,9 +62,9 @@ class _SessionSetupScreenState extends ConsumerState<SessionSetupScreen> {
     final profile = ref.watch(userProfileNotifierProvider).value;
 
     return Scaffold(
-      backgroundColor: AppColors.bg900,
+      backgroundColor: AppColors.bgPage,
       appBar: AppBar(
-        backgroundColor: AppColors.bg900,
+        backgroundColor: AppColors.bgPage,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => context.pop(),
@@ -119,12 +119,12 @@ class _TopicCard extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            AppColors.brandPurple.withOpacity(0.15),
+            AppColors.blue.withOpacity(0.15),
             AppColors.teal.withOpacity(0.1),
           ],
         ),
         borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-        border: Border.all(color: AppColors.brandPurple.withOpacity(0.3)),
+        border: Border.all(color: AppColors.blue.withOpacity(0.3)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -133,7 +133,7 @@ class _TopicCard extends StatelessWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: AppColors.brandPurple,
+              color: AppColors.blue,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Center(
@@ -231,11 +231,11 @@ class _ModeCard extends StatelessWidget {
         padding: const EdgeInsets.all(AppDimensions.md),
         decoration: BoxDecoration(
           color: selected
-              ? AppColors.brandPurple.withOpacity(0.15)
-              : AppColors.bg700,
+              ? AppColors.blue.withOpacity(0.15)
+              : AppColors.bgSurface,
           borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
           border: Border.all(
-            color: selected ? AppColors.brandPurple : AppColors.bg500,
+            color: selected ? AppColors.blue : AppColors.borderSubtle,
             width: selected ? 2 : 1,
           ),
         ),
@@ -246,7 +246,7 @@ class _ModeCard extends StatelessWidget {
               children: [
                 Icon(
                   icon,
-                  color: selected ? AppColors.brandPurple : AppColors.textSecondary,
+                  color: selected ? AppColors.blue : AppColors.textSecondary,
                   size: 24,
                 ),
                 const Spacer(),
@@ -284,7 +284,7 @@ class _SkeletonBox extends StatelessWidget {
     return Container(
       height: height,
       decoration: BoxDecoration(
-        color: AppColors.bg700,
+        color: AppColors.bgSurface,
         borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
       ),
     );

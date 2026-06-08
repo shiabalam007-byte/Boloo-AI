@@ -168,7 +168,7 @@ class BottomNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final items = [
       (icon: Icons.home_rounded, label: 'Home', path: '/dashboard'),
-      (icon: Icons.map_outlined, label: 'Journey', path: '/journey'),
+      (icon: Icons.mic_rounded, label: 'Practice', path: '/journey'),
       (icon: Icons.bar_chart_rounded, label: 'Progress', path: '/progress'),
       (icon: Icons.person_outline_rounded, label: 'Profile', path: '/profile'),
     ];
@@ -177,8 +177,8 @@ class BottomNavBar extends StatelessWidget {
 
     return Container(
       decoration: const BoxDecoration(
-        color: Color(0xFF111113),
-        border: Border(top: BorderSide(color: Color(0xFF32323C), width: 1)),
+        color: Color(0xFFFFFFFF),
+        border: Border(top: BorderSide(color: Color(0xFFE2E8F0), width: 1)),
       ),
       child: SafeArea(
         child: SizedBox(
@@ -197,8 +197,8 @@ class BottomNavBar extends StatelessWidget {
                       Icon(
                         item.icon,
                         color: selected
-                            ? const Color(0xFF7C3AED)
-                            : const Color(0xFF71717A),
+                            ? const Color(0xFF2563EB)
+                            : const Color(0xFF94A3B8),
                         size: 24,
                       ),
                       const SizedBox(height: 2),
@@ -209,8 +209,8 @@ class BottomNavBar extends StatelessWidget {
                           fontSize: 10,
                           fontWeight: FontWeight.w500,
                           color: selected
-                              ? const Color(0xFF7C3AED)
-                              : const Color(0xFF71717A),
+                              ? const Color(0xFF2563EB)
+                              : const Color(0xFF94A3B8),
                         ),
                       ),
                     ],

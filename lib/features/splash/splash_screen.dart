@@ -54,7 +54,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bg900,
+      backgroundColor: AppColors.bgPage,
       body: Center(
         child: FadeTransition(
           opacity: _fadeAnim,
@@ -68,7 +68,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                   height: 88,
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [AppColors.brandPurple, AppColors.teal],
+                      colors: [AppColors.blue, AppColors.brandPurple],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),

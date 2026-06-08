@@ -19,7 +19,7 @@ class AssessmentResultScreen extends ConsumerWidget {
 
     if (result == null) {
       return const Scaffold(
-        backgroundColor: AppColors.bg900,
+        backgroundColor: AppColors.bgPage,
         body: Center(child: CircularProgressIndicator()),
       );
     }
@@ -35,13 +35,14 @@ class AssessmentResultScreen extends ConsumerWidget {
     final firstName = profile?.fullName?.split(' ').first ?? 'there';
 
     return Scaffold(
-      backgroundColor: AppColors.bg900,
+      backgroundColor: AppColors.bgPage,
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
-            backgroundColor: AppColors.bg900,
+            backgroundColor: AppColors.bgPage,
             automaticallyImplyLeading: false,
             floating: true,
+            elevation: 0,
             title: Row(
               children: [
                 _MayaAvatar(),
@@ -86,7 +87,7 @@ class AssessmentResultScreen extends ConsumerWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: AppColors.success.withOpacity(0.15),
+            color: AppColors.success.withOpacity(0.12),
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text(
@@ -155,22 +156,15 @@ class AssessmentResultScreen extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(AppDimensions.md),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppColors.brandPurple.withOpacity(0.15),
-            AppColors.teal.withOpacity(0.08),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: AppColors.blueLight,
         borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-        border: Border.all(color: AppColors.brandPurple.withOpacity(0.3)),
+        border: Border.all(color: AppColors.blue.withOpacity(0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('💡 Your Biggest Opportunity',
-              style: AppTypography.caption.copyWith(color: AppColors.lightPurple)),
+              style: AppTypography.caption.copyWith(color: AppColors.blue)),
           const SizedBox(height: AppDimensions.xs),
           Text(opportunity, style: AppTypography.bodyLarge),
         ],
@@ -184,14 +178,14 @@ class AssessmentResultScreen extends ConsumerWidget {
         Container(
           padding: const EdgeInsets.all(AppDimensions.md),
           decoration: BoxDecoration(
-            color: AppColors.bg700,
+            color: AppColors.bgSurface,
             borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-            border: Border.all(color: AppColors.bg500),
+            border: Border.all(color: AppColors.borderSubtle),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('📋 Your Personalized 30-Day Plan',
+              Text('📋 Your Personalized 90-Day Plan',
                   style: AppTypography.h3),
               const SizedBox(height: AppDimensions.md),
               ...[
@@ -206,7 +200,7 @@ class AssessmentResultScreen extends ConsumerWidget {
                     Container(
                       width: 6, height: 6,
                       decoration: const BoxDecoration(
-                        color: AppColors.brandPurple,
+                        color: AppColors.blue,
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -229,29 +223,31 @@ class AssessmentResultScreen extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(AppDimensions.lg),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppColors.brandPurple.withOpacity(0.2),
-            AppColors.teal.withOpacity(0.1),
-          ],
+        gradient: const LinearGradient(
+          colors: [AppColors.blue, AppColors.brandPurple],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(AppDimensions.radiusHero),
-        border: Border.all(color: AppColors.brandPurple.withOpacity(0.4)),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.blue.withOpacity(0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
       child: Column(
         children: [
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
             decoration: BoxDecoration(
-              color: AppColors.warning.withOpacity(0.15),
+              color: Colors.white.withOpacity(0.2),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: AppColors.warning.withOpacity(0.4)),
             ),
             child: Text(
               '🎁 Founding Member Offer',
-              style: AppTypography.caption.copyWith(color: AppColors.warning),
+              style: AppTypography.caption.copyWith(color: Colors.white),
             ),
           ),
           const SizedBox(height: AppDimensions.md),
@@ -259,23 +255,23 @@ class AssessmentResultScreen extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('৳', style: AppTypography.h2.copyWith(color: AppColors.lightPurple)),
+              Text('৳', style: AppTypography.h2.copyWith(color: Colors.white.withOpacity(0.85))),
               Text('1,999', style: AppTypography.displayXL.copyWith(
-                color: AppColors.textPrimary,
+                color: Colors.white,
               )),
             ],
           ),
           Text(
             'Was ৳2,999 — Limited Time',
             style: AppTypography.caption.copyWith(
-              color: AppColors.textTertiary,
+              color: Colors.white.withOpacity(0.7),
               decoration: TextDecoration.lineThrough,
             ),
           ),
           const SizedBox(height: AppDimensions.xs),
           Text(
             '90 Days Full Access',
-            style: AppTypography.body.copyWith(color: AppColors.textSecondary),
+            style: AppTypography.body.copyWith(color: Colors.white.withOpacity(0.85)),
           ),
           const SizedBox(height: AppDimensions.lg),
           _buildFeatureChips(),
@@ -285,8 +281,8 @@ class AssessmentResultScreen extends ConsumerWidget {
             child: ElevatedButton(
               onPressed: () => context.go('/paywall'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.brandPurple,
-                foregroundColor: Colors.white,
+                backgroundColor: Colors.white,
+                foregroundColor: AppColors.blue,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
@@ -295,7 +291,7 @@ class AssessmentResultScreen extends ConsumerWidget {
               ),
               child: Text(
                 'Unlock My Full Program →',
-                style: AppTypography.h3.copyWith(color: Colors.white),
+                style: AppTypography.h3.copyWith(color: AppColors.blue),
               ),
             ),
           ),
@@ -306,7 +302,7 @@ class AssessmentResultScreen extends ConsumerWidget {
 
   Widget _buildFeatureChips() {
     const features = [
-      '30 AI Sessions',
+      '90 AI Sessions',
       '90-Day Access',
       'Progress Tracking',
       'bKash / Nagad',
@@ -318,11 +314,10 @@ class AssessmentResultScreen extends ConsumerWidget {
       children: features.map((f) => Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-          color: AppColors.bg600,
+          color: Colors.white.withOpacity(0.2),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppColors.bg500),
         ),
-        child: Text(f, style: AppTypography.micro.copyWith(color: AppColors.textSecondary)),
+        child: Text(f, style: AppTypography.micro.copyWith(color: Colors.white)),
       )).toList(),
     );
   }
@@ -360,11 +355,16 @@ class _ScoreCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppDimensions.md),
       decoration: BoxDecoration(
-        color: AppColors.bg700,
+        color: AppColors.bgSurface,
         borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-        border: Border.all(
-          color: _scoreColor.withOpacity(0.3),
-        ),
+        border: Border.all(color: _scoreColor.withOpacity(0.2)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         children: [
@@ -409,9 +409,16 @@ class _ResultSection extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppDimensions.md),
       decoration: BoxDecoration(
-        color: AppColors.bg700,
+        color: AppColors.bgSurface,
         borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-        border: Border.all(color: AppColors.bg500),
+        border: Border.all(color: AppColors.borderSubtle),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -471,18 +478,18 @@ class _BlurLock extends StatelessWidget {
         filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
         child: Container(
           decoration: BoxDecoration(
-            color: AppColors.bg900.withOpacity(0.6),
+            color: Colors.white.withOpacity(0.7),
             borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
           ),
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.lock_rounded, color: AppColors.lightPurple, size: 22),
+                const Icon(Icons.lock_rounded, color: AppColors.blue, size: 22),
                 const SizedBox(height: 6),
                 Text(
                   message,
-                  style: AppTypography.caption.copyWith(color: AppColors.lightPurple),
+                  style: AppTypography.caption.copyWith(color: AppColors.blue),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -501,7 +508,7 @@ class _MayaAvatar extends StatelessWidget {
       width: 36, height: 36,
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [AppColors.brandPurple, AppColors.teal],
+          colors: [AppColors.blue, AppColors.brandPurple],
         ),
         shape: BoxShape.circle,
       ),

@@ -58,7 +58,6 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
   Widget build(BuildContext context) {
     final state = ref.watch(assessmentProvider);
 
-    // Navigate to result when complete
     ref.listen(assessmentProvider, (prev, next) {
       if (next.status == AssessmentStatus.complete && next.result != null) {
         context.go('/assessment-result');
@@ -68,10 +67,11 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
     _scrollToBottom();
 
     return Scaffold(
-      backgroundColor: AppColors.bg900,
+      backgroundColor: AppColors.bgPage,
       appBar: AppBar(
-        backgroundColor: AppColors.bg900,
+        backgroundColor: AppColors.bgPage,
         automaticallyImplyLeading: false,
+        elevation: 0,
         title: Row(
           children: [
             _MayaAvatar(size: 36),
@@ -152,7 +152,7 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
                         () => ref.read(assessmentProvider.notifier).startAssessment());
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.brandPurple,
+                    backgroundColor: AppColors.blue,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
@@ -189,8 +189,8 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
     final isActive = state.status == AssessmentStatus.active;
     return Container(
       decoration: const BoxDecoration(
-        color: AppColors.bg800,
-        border: Border(top: BorderSide(color: AppColors.bg600)),
+        color: AppColors.bgSurface,
+        border: Border(top: BorderSide(color: AppColors.borderSubtle)),
       ),
       padding: const EdgeInsets.fromLTRB(
         AppDimensions.md, AppDimensions.sm, AppDimensions.md, AppDimensions.md,
@@ -214,10 +214,18 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
                           : 'Please wait...',
                   hintStyle: AppTypography.body.copyWith(color: AppColors.textTertiary),
                   filled: true,
-                  fillColor: AppColors.bg700,
+                  fillColor: AppColors.bgSurface2,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(24),
-                    borderSide: BorderSide.none,
+                    borderSide: const BorderSide(color: AppColors.borderSubtle),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(24),
+                    borderSide: const BorderSide(color: AppColors.borderSubtle),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(24),
+                    borderSide: const BorderSide(color: AppColors.blue, width: 2),
                   ),
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16, vertical: 10,
@@ -233,12 +241,7 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  gradient: isActive
-                      ? const LinearGradient(
-                          colors: [AppColors.brandPurple, AppColors.teal],
-                        )
-                      : null,
-                  color: isActive ? null : AppColors.bg600,
+                  color: isActive ? AppColors.blue : AppColors.bgSurface2,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -272,7 +275,7 @@ class _ProgressIndicator extends StatelessWidget {
             margin: const EdgeInsets.symmetric(horizontal: 2),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: i < current ? AppColors.brandPurple : AppColors.bg500,
+              color: i < current ? AppColors.blue : AppColors.borderMedium,
             ),
           );
         }),
@@ -287,14 +290,9 @@ class _ScoringBanner extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppColors.brandPurple.withOpacity(0.15),
-            AppColors.teal.withOpacity(0.1),
-          ],
-        ),
+        color: AppColors.blueLight,
         border: const Border(
-          bottom: BorderSide(color: AppColors.brandPurple, width: 0.5),
+          bottom: BorderSide(color: AppColors.blue, width: 0.5),
         ),
       ),
       child: Row(
@@ -305,13 +303,13 @@ class _ScoringBanner extends StatelessWidget {
             height: 16,
             child: CircularProgressIndicator(
               strokeWidth: 2,
-              valueColor: AlwaysStoppedAnimation(AppColors.lightPurple),
+              valueColor: const AlwaysStoppedAnimation(AppColors.blue),
             ),
           ),
           const SizedBox(width: 10),
           Text(
             'Maya is building your personalized analysis...',
-            style: AppTypography.caption.copyWith(color: AppColors.lightPurple),
+            style: AppTypography.caption.copyWith(color: AppColors.blue),
           ),
         ],
       ),
@@ -343,13 +341,21 @@ class _MessageBubble extends StatelessWidget {
                 maxWidth: MediaQuery.of(context).size.width * 0.78,
               ),
               decoration: BoxDecoration(
-                color: isUser ? AppColors.brandPurple : AppColors.bg700,
+                color: isUser ? AppColors.blue : AppColors.bgSurface,
                 borderRadius: BorderRadius.only(
                   topLeft: const Radius.circular(16),
                   topRight: const Radius.circular(16),
                   bottomLeft: Radius.circular(isUser ? 16 : 4),
                   bottomRight: Radius.circular(isUser ? 4 : 16),
                 ),
+                border: isUser ? null : Border.all(color: AppColors.borderSubtle),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.04),
+                    blurRadius: 4,
+                    offset: const Offset(0, 1),
+                  ),
+                ],
               ),
               child: Text(
                 message.content,
@@ -376,7 +382,7 @@ class _MayaAvatar extends StatelessWidget {
       height: size,
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [AppColors.brandPurple, AppColors.teal],
+          colors: [AppColors.blue, AppColors.brandPurple],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -434,14 +440,15 @@ class _TypingBubbleState extends State<_TypingBubble>
           const SizedBox(width: 6),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: const BoxDecoration(
-              color: AppColors.bg700,
-              borderRadius: BorderRadius.only(
+            decoration: BoxDecoration(
+              color: AppColors.bgSurface,
+              borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(16),
                 topRight: Radius.circular(16),
                 bottomLeft: Radius.circular(4),
                 bottomRight: Radius.circular(16),
               ),
+              border: Border.all(color: AppColors.borderSubtle),
             ),
             child: AnimatedBuilder(
               animation: _controller,

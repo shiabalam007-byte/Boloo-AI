@@ -63,9 +63,10 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bg900,
+      backgroundColor: AppColors.bgPage,
       appBar: AppBar(
-        backgroundColor: AppColors.bg900,
+        backgroundColor: AppColors.bgPage,
+        elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.close_rounded),
           onPressed: () {
@@ -112,12 +113,12 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: AppColors.brandPurple.withOpacity(0.2),
+            color: AppColors.blueLight,
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text(
             '🚀 90-Day Career Accelerator',
-            style: AppTypography.caption.copyWith(color: AppColors.lightPurple),
+            style: AppTypography.caption.copyWith(color: AppColors.blue),
           ),
         ),
         const SizedBox(height: AppDimensions.md),
@@ -168,22 +169,25 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     return Container(
       padding: const EdgeInsets.all(AppDimensions.lg),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppColors.brandPurple.withOpacity(0.2),
-            AppColors.teal.withOpacity(0.1),
-          ],
+        gradient: const LinearGradient(
+          colors: [AppColors.blue, AppColors.brandPurple],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(AppDimensions.radiusHero),
-        border: Border.all(color: AppColors.brandPurple.withOpacity(0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.blue.withOpacity(0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
       child: Column(
         children: [
           Text(
             'Founding Member Offer',
-            style: AppTypography.caption.copyWith(color: AppColors.textSecondary),
+            style: AppTypography.caption.copyWith(color: Colors.white.withOpacity(0.8)),
           ),
           const SizedBox(height: AppDimensions.sm),
           Row(
@@ -192,24 +196,24 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
             children: [
               Text(
                 '৳',
-                style: AppTypography.h2.copyWith(color: AppColors.lightPurple),
+                style: AppTypography.h2.copyWith(color: Colors.white.withOpacity(0.85)),
               ),
               Text('1,999', style: AppTypography.displayXL.copyWith(
-                color: AppColors.textPrimary,
+                color: Colors.white,
               )),
             ],
           ),
           Text(
             'Was ৳2,999 — Limited Time',
             style: AppTypography.caption.copyWith(
-              color: AppColors.textTertiary,
+              color: Colors.white.withOpacity(0.6),
               decoration: TextDecoration.lineThrough,
             ),
           ),
           const SizedBox(height: AppDimensions.xs),
           Text(
             '90 Days Full Access',
-            style: AppTypography.caption.copyWith(color: AppColors.textSecondary),
+            style: AppTypography.caption.copyWith(color: Colors.white.withOpacity(0.85)),
           ),
         ],
       ),
@@ -220,16 +224,22 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Accepted payments', style: AppTypography.caption),
+        const Text('Accepted payments', style: AppTypography.caption),
         const SizedBox(height: AppDimensions.sm),
         Row(
           children: ['bKash', 'Nagad', 'Visa', 'MasterCard'].map((m) => Container(
             margin: const EdgeInsets.only(right: 8),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: AppColors.bg600,
+              color: AppColors.bgSurface,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: AppColors.bg500),
+              border: Border.all(color: AppColors.borderSubtle),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.04),
+                  blurRadius: 4,
+                ),
+              ],
             ),
             child: Text(m, style: AppTypography.micro.copyWith(
               color: AppColors.textSecondary,
@@ -287,9 +297,10 @@ class _PaymentWebViewState extends State<PaymentWebView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bg900,
+      backgroundColor: AppColors.bgPage,
       appBar: AppBar(
-        backgroundColor: AppColors.bg900,
+        backgroundColor: AppColors.bgPage,
+        elevation: 0,
         title: const Text('Complete Payment', style: AppTypography.h3),
         leading: IconButton(
           icon: const Icon(Icons.close_rounded),

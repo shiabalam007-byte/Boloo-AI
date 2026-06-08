@@ -33,7 +33,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bg900,
+      backgroundColor: AppColors.bgPage,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(AppDimensions.lg),
@@ -76,14 +76,14 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
           height: 56,
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [AppColors.brandPurple, AppColors.teal],
+              colors: [AppColors.blue, AppColors.brandPurple],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: AppColors.brandPurple.withOpacity(0.35),
+                color: AppColors.blue.withOpacity(0.25),
                 blurRadius: 16,
                 spreadRadius: 2,
               ),
@@ -103,14 +103,21 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
-              color: AppColors.bg700,
+              color: AppColors.bgSurface,
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(16),
                 topRight: Radius.circular(16),
                 bottomRight: Radius.circular(16),
                 bottomLeft: Radius.circular(4),
               ),
-              border: Border.all(color: AppColors.bg500),
+              border: Border.all(color: AppColors.borderSubtle),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.04),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: Text(
               'Hi! I\'m Maya — your personal AI English coach. Before we start, quick question:',
@@ -176,12 +183,19 @@ class _LanguageCard extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.all(AppDimensions.md),
         decoration: BoxDecoration(
-          color: selected ? AppColors.brandPurple.withOpacity(0.15) : AppColors.bg700,
+          color: selected ? AppColors.blueLight : AppColors.bgSurface,
           borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
           border: Border.all(
-            color: selected ? AppColors.brandPurple : AppColors.bg500,
+            color: selected ? AppColors.blue : AppColors.borderSubtle,
             width: selected ? 2 : 1,
           ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Row(
           children: [
@@ -197,7 +211,7 @@ class _LanguageCard extends StatelessWidget {
               ),
             ),
             if (selected)
-              const Icon(Icons.check_circle_rounded, color: AppColors.brandPurple),
+              const Icon(Icons.check_circle_rounded, color: AppColors.blue),
           ],
         ),
       ),

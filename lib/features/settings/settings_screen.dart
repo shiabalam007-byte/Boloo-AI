@@ -52,7 +52,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final result = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.bg700,
+        backgroundColor: AppColors.bgSurface,
         title: const Text('Edit Name', style: AppTypography.h3),
         content: TextField(
           controller: controller,
@@ -87,7 +87,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
-          backgroundColor: AppColors.bg700,
+          backgroundColor: AppColors.bgSurface,
           title: const Text('Daily Goal', style: AppTypography.h3),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -130,7 +130,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.bg700,
+        backgroundColor: AppColors.bgSurface,
         title: const Text('Contact Support', style: AppTypography.h3),
         content: Text(
           'Email us at $_kSupportEmail\n\nWe respond within 24 hours.',
@@ -150,7 +150,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.bg700,
+        backgroundColor: AppColors.bgSurface,
         title: const Text('Sign Out', style: AppTypography.h3),
         content: const Text(
           'Are you sure you want to sign out?',
@@ -184,9 +184,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final profile = profileAsync.value;
 
     return Scaffold(
-      backgroundColor: AppColors.bg900,
+      backgroundColor: AppColors.bgPage,
       appBar: AppBar(
-        backgroundColor: AppColors.bg900,
+        backgroundColor: AppColors.bgPage,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => context.canPop() ? context.pop() : context.go('/profile'),
@@ -335,9 +335,9 @@ class _Section extends StatelessWidget {
         Container(
           margin: const EdgeInsets.symmetric(horizontal: AppDimensions.lg),
           decoration: BoxDecoration(
-            color: AppColors.bg700,
+            color: AppColors.bgSurface,
             borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-            border: Border.all(color: AppColors.bg500),
+            border: Border.all(color: AppColors.borderSubtle),
           ),
           child: Column(children: children),
         ),
@@ -423,9 +423,9 @@ class _WebPageScreenState extends State<_WebPageScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bg900,
+      backgroundColor: AppColors.bgPage,
       appBar: AppBar(
-        backgroundColor: AppColors.bg900,
+        backgroundColor: AppColors.bgPage,
         title: Text(widget.title, style: AppTypography.h3),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
@@ -470,7 +470,7 @@ class _SwitchTile extends StatelessWidget {
               if (states.contains(WidgetState.selected)) {
                 return AppColors.brandPurple.withOpacity(0.3);
               }
-              return AppColors.bg500;
+              return AppColors.borderSubtle;
             }),
           ),
         ],

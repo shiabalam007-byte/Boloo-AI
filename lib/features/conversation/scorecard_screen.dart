@@ -88,7 +88,7 @@ class _ScorecardScreenState extends ConsumerState<ScorecardScreen>
         widget.scores?['improvements'] as List? ?? ['Keep practicing']);
 
     return Scaffold(
-      backgroundColor: AppColors.bg900,
+      backgroundColor: AppColors.bgPage,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppDimensions.lg),
@@ -131,7 +131,7 @@ class _ScorecardScreenState extends ConsumerState<ScorecardScreen>
           height: 80,
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [AppColors.brandPurple, AppColors.teal],
+              colors: [AppColors.blue, AppColors.brandPurple],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -183,14 +183,9 @@ class _ScorecardScreenState extends ConsumerState<ScorecardScreen>
     return Container(
       padding: const EdgeInsets.all(AppDimensions.md),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppColors.brandPurple.withOpacity(0.15),
-            AppColors.teal.withOpacity(0.05),
-          ],
-        ),
+        color: AppColors.blueLight,
         borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-        border: Border.all(color: AppColors.brandPurple.withOpacity(0.3)),
+        border: Border.all(color: AppColors.blue.withOpacity(0.2)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -200,7 +195,7 @@ class _ScorecardScreenState extends ConsumerState<ScorecardScreen>
             height: 40,
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [AppColors.brandPurple, AppColors.teal],
+                colors: [AppColors.blue, AppColors.brandPurple],
               ),
               shape: BoxShape.circle,
             ),
@@ -224,7 +219,7 @@ class _ScorecardScreenState extends ConsumerState<ScorecardScreen>
                 Text(
                   "Maya's Feedback",
                   style: AppTypography.caption.copyWith(
-                    color: AppColors.lightPurple,
+                    color: AppColors.blue,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -272,7 +267,7 @@ class _AnimatedScoreCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppDimensions.md),
       decoration: BoxDecoration(
-        color: AppColors.bg700,
+        color: AppColors.bgSurface,
         borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
         border: Border.all(color: color.withOpacity(0.3)),
       ),
@@ -289,7 +284,7 @@ class _AnimatedScoreCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(2),
             child: LinearProgressIndicator(
               value: score / 100,
-              backgroundColor: AppColors.bg500,
+              backgroundColor: AppColors.bgSurface2,
               valueColor: AlwaysStoppedAnimation<Color>(color),
               minHeight: 4,
             ),
@@ -318,9 +313,9 @@ class _FeedbackSection extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppDimensions.md),
       decoration: BoxDecoration(
-        color: AppColors.bg700,
+        color: AppColors.bgSurface,
         borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-        border: Border.all(color: AppColors.bg500),
+        border: Border.all(color: AppColors.borderSubtle),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
