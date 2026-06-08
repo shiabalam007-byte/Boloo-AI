@@ -69,7 +69,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
         leading: IconButton(
           icon: const Icon(Icons.close_rounded),
           onPressed: () {
-            if (context.canPop()) context.pop();
+            context.canPop() ? context.pop() : context.go('/auth');
           },
         ),
       ),
@@ -87,7 +87,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
             _buildPaymentMethods(),
             const SizedBox(height: AppDimensions.xl),
             BoolooButton.primary(
-              label: 'Start My Journey — ৳2,999',
+              label: 'Start My Journey — ৳1,999',
               onPressed: _isLoading ? null : _purchaseNow,
               isLoading: _isLoading,
             ),
@@ -194,7 +194,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                 '৳',
                 style: AppTypography.h2.copyWith(color: AppColors.lightPurple),
               ),
-              Text('2,999', style: AppTypography.displayXL.copyWith(
+              Text('1,999', style: AppTypography.displayXL.copyWith(
                 color: AppColors.textPrimary,
               )),
             ],
