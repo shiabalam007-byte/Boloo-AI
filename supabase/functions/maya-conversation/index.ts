@@ -165,7 +165,7 @@ Deno.serve(async (req: Request) => {
       : geminiMessages
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -174,7 +174,7 @@ Deno.serve(async (req: Request) => {
           contents: validMessages.length > 0 ? validMessages : [{ role: 'user', parts: [{ text: '[START]' }] }],
           generationConfig: {
             temperature: isAssessment ? 0.7 : 0.8,
-            maxOutputTokens: isAssessment ? 300 : 400,
+            maxOutputTokens: isAssessment ? 1024 : 1024,
             topP: 0.9,
           },
           safetySettings: [

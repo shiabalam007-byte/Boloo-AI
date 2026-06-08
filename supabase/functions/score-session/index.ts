@@ -127,7 +127,7 @@ Deno.serve(async (req: Request) => {
       : `Language preference: ${body.languagePreference}\nUser level: ${body.userLevel}\nTopic: ${body.topic}\n\nTranscript (user messages only):\n${body.transcript}`
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -135,7 +135,7 @@ Deno.serve(async (req: Request) => {
           contents: [{ role: 'user', parts: [{ text: `${systemPrompt}\n\n${transcriptContent}\n\nReturn the JSON now:` }] }],
           generationConfig: {
             temperature: 0.3,
-            maxOutputTokens: 800,
+            maxOutputTokens: 2048,
             responseMimeType: 'application/json',
           },
         }),
