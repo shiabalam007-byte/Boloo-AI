@@ -73,3 +73,4 @@ build/
 debug_web.js
 screenshot_verify.js
 screenshot_auth_subs.js
+live_verify.js
