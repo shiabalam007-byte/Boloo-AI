@@ -25,7 +25,9 @@ class ConversationService {
         'mode': mode.name,
         'session_type': sessionType == SessionType.dailyChallenge
             ? 'daily_challenge'
-            : 'free_practice',
+            : sessionType == SessionType.assessment
+                ? 'assessment'
+                : 'free_practice',
         'journey_day': journeyDay,
         'topic': topic,
         'scenario': scenario,

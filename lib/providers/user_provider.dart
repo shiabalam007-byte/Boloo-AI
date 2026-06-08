@@ -36,6 +36,25 @@ class UserProfileNotifier extends AsyncNotifier<UserProfile?> {
     state = AsyncData(updated);
   }
 
+  Future<void> completeAssessment({
+    required Map<String, dynamic> assessmentResult,
+    required String detectedGoal,
+    required String detectedLevel,
+    required String detectedOccupation,
+  }) async {
+    final user = ref.read(currentUserProvider);
+    if (user == null) return;
+
+    final updated = await ref.read(userServiceProvider).completeAssessment(
+      userId: user.id,
+      assessmentResult: assessmentResult,
+      detectedGoal: detectedGoal,
+      detectedLevel: detectedLevel,
+      detectedOccupation: detectedOccupation,
+    );
+    state = AsyncData(updated);
+  }
+
   Future<void> completeOnboarding({
     required String languagePreference,
     required String primaryGoal,

@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 enum SessionMode { voice, text }
-enum SessionType { dailyChallenge, freePractice }
+enum SessionType { dailyChallenge, freePractice, assessment }
 
 @immutable
 class Conversation {
@@ -48,7 +48,9 @@ class Conversation {
       mode: json['mode'] == 'voice' ? SessionMode.voice : SessionMode.text,
       sessionType: json['session_type'] == 'daily_challenge'
           ? SessionType.dailyChallenge
-          : SessionType.freePractice,
+          : json['session_type'] == 'assessment'
+              ? SessionType.assessment
+              : SessionType.freePractice,
       journeyDay: json['journey_day'] as int?,
       topic: json['topic'] as String?,
       scenario: json['scenario'] as String?,
@@ -74,7 +76,9 @@ class Conversation {
     'mode': mode.name,
     'session_type': sessionType == SessionType.dailyChallenge
         ? 'daily_challenge'
-        : 'free_practice',
+        : sessionType == SessionType.assessment
+            ? 'assessment'
+            : 'free_practice',
     'journey_day': journeyDay,
     'topic': topic,
     'scenario': scenario,

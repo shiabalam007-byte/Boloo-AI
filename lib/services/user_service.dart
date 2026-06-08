@@ -51,4 +51,21 @@ class UserService {
       if (fullName != null) 'full_name': fullName,
     });
   }
+
+  Future<UserProfile> completeAssessment({
+    required String userId,
+    required Map<String, dynamic> assessmentResult,
+    required String detectedGoal,
+    required String detectedLevel,
+    required String detectedOccupation,
+  }) async {
+    return updateProfile(userId, {
+      'assessment_completed': true,
+      'assessment_result': assessmentResult,
+      'primary_goal': detectedGoal,
+      'english_level': detectedLevel,
+      'occupation': detectedOccupation,
+      'onboarding_completed': true,
+    });
+  }
 }

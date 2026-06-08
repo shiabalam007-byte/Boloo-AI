@@ -24,12 +24,50 @@ interface SessionConfig {
   scenario: string
   sessionType: string
   keyPhrases: string[]
+  questionIndex?: number  // 0-3 for assessment mode
 }
 
 interface RequestBody {
   messages: Message[]
   userContext: UserContext
   sessionConfig: SessionConfig
+}
+
+const buildAssessmentSystemPrompt = (ctx: UserContext, questionIndex: number): string => {
+  const name = ctx.fullName ? ctx.fullName.split(' ')[0] : 'there'
+  const langNote = ctx.languagePreference === 'bangla'
+    ? 'The user prefers Bangla. Respond in Bangla, but you may use English words naturally.'
+    : ctx.languagePreference === 'english'
+    ? 'Respond fully in English.'
+    : 'You may use a natural mix of Bangla and English. Start in Bangla to build comfort, gradually use more English.'
+
+  const questions = [
+    `Ask: Are you currently a student, job seeker, freelancer, entrepreneur, or working professional? Keep it warm and brief — one sentence intro then the question.`,
+    `Ask: What is the biggest opportunity you feel you are missing right now because of your English? Be specific, curious, empathetic.`,
+    `Ask: What do you want to achieve in the next 90 days? Dream big — what would change in your career or life?`,
+    `Ask: On a scale from 1 to 10, how confident do you feel speaking English right now — especially in professional situations? Then after their answer, give a warm, personal closing: tell them you now have everything you need to build their personalized analysis, and that you are genuinely excited to show them what is possible for them. Keep it human, specific, motivating — 2-3 sentences max.`,
+  ]
+
+  return `You are Maya, the AI English Communication Coach for BOLOO AI.
+
+You are conducting a short 4-question assessment to understand this person deeply before building their personalized improvement plan.
+
+${langNote}
+
+User's name: ${name}
+
+Your personality: Warm, human, curious, like a successful mentor who genuinely cares. NOT a formal interviewer. NOT a chatbot. A real person who wants to understand their story.
+
+CURRENT TASK (Question ${questionIndex + 1} of 4):
+${questions[questionIndex]}
+
+RULES:
+- Keep your response to 2-4 sentences maximum
+- Be genuinely curious about their answer — not transactional
+- If they gave a previous answer, acknowledge ONE specific thing from it before moving forward
+- Never say "As an AI" or "I am a language model"
+- Never list multiple questions at once — ask exactly one thing
+- Never correct their English during the assessment — this is about understanding, not teaching`
 }
 
 const buildMayaSystemPrompt = (ctx: UserContext, config: SessionConfig): string => {
@@ -84,7 +122,7 @@ RIGHT: "That was a confident answer! I love how you used that phrase. One small 
 
 ═══ RULES ═══
 ✗ Never correct every mistake — pick the most important one
-✗ Never use academic grammar terms like "subject-verb agreement"  
+✗ Never use academic grammar terms like "subject-verb agreement"
 ✗ Never say "As an AI..."
 ✗ Never give long lectures — keep it conversational
 ✗ Never make them feel stupid or embarrassed
@@ -107,14 +145,26 @@ serve(async (req) => {
     const body: RequestBody = await req.json()
     const { messages, userContext, sessionConfig } = body
 
-    const systemPrompt = buildMayaSystemPrompt(userContext, sessionConfig)
+    const isAssessment = sessionConfig.sessionType === 'assessment'
+    const questionIndex = sessionConfig.questionIndex ?? 0
+
+    const systemPrompt = isAssessment
+      ? buildAssessmentSystemPrompt(userContext, questionIndex)
+      : buildMayaSystemPrompt(userContext, sessionConfig)
 
     const recentMessages = messages.slice(-20)
 
-    const geminiMessages = recentMessages.map((msg) => ({
-      role: msg.role,
-      parts: [{ text: msg.content }],
-    }))
+    const geminiMessages = recentMessages
+      .filter(m => !m.content.startsWith('['))
+      .map((msg) => ({
+        role: msg.role,
+        parts: [{ text: msg.content }],
+      }))
+
+    // Gemini requires messages to start with 'user' role
+    const validMessages = geminiMessages.length > 0 && geminiMessages[0].role === 'model'
+      ? geminiMessages.slice(1)
+      : geminiMessages
 
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`,
@@ -123,10 +173,10 @@ serve(async (req) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           systemInstruction: { parts: [{ text: systemPrompt }] },
-          contents: geminiMessages,
+          contents: validMessages.length > 0 ? validMessages : [{ role: 'user', parts: [{ text: '[START]' }] }],
           generationConfig: {
-            temperature: 0.8,
-            maxOutputTokens: 400,
+            temperature: isAssessment ? 0.7 : 0.8,
+            maxOutputTokens: isAssessment ? 300 : 400,
             topP: 0.9,
           },
           safetySettings: [
@@ -154,7 +204,7 @@ serve(async (req) => {
   } catch (error) {
     return new Response(
       JSON.stringify({ error: (error as Error).message }),
-      { 
+      {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }

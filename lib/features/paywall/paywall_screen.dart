@@ -182,7 +182,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
       child: Column(
         children: [
           Text(
-            'One-time payment',
+            'Founding Member Offer',
             style: AppTypography.caption.copyWith(color: AppColors.textSecondary),
           ),
           const SizedBox(height: AppDimensions.sm),
@@ -200,11 +200,16 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
             ],
           ),
           Text(
-            'Was ৳4,999 — Launch Price',
+            'Was ৳2,999 — Limited Time',
             style: AppTypography.caption.copyWith(
               color: AppColors.textTertiary,
               decoration: TextDecoration.lineThrough,
             ),
+          ),
+          const SizedBox(height: AppDimensions.xs),
+          Text(
+            '90 Days Full Access',
+            style: AppTypography.caption.copyWith(color: AppColors.textSecondary),
           ),
         ],
       ),

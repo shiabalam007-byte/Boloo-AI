@@ -19,6 +19,8 @@ class UserProfile {
     this.journeyStartDate,
     this.currentDay = 1,
     this.onboardingCompleted = false,
+    this.assessmentCompleted = false,
+    this.assessmentResult,
     this.totalSessions = 0,
     this.totalMinutes = 0,
     this.createdAt,
@@ -36,6 +38,8 @@ class UserProfile {
   final DateTime? journeyStartDate;
   final int currentDay;
   final bool onboardingCompleted;
+  final bool assessmentCompleted;
+  final Map<String, dynamic>? assessmentResult;
   final int totalSessions;
   final int totalMinutes;
   final DateTime? createdAt;
@@ -56,6 +60,8 @@ class UserProfile {
           : null,
       currentDay: json['current_day'] as int? ?? 1,
       onboardingCompleted: json['onboarding_completed'] as bool? ?? false,
+      assessmentCompleted: json['assessment_completed'] as bool? ?? false,
+      assessmentResult: json['assessment_result'] as Map<String, dynamic>?,
       totalSessions: json['total_sessions'] as int? ?? 0,
       totalMinutes: json['total_minutes'] as int? ?? 0,
       createdAt: json['created_at'] != null
@@ -77,6 +83,8 @@ class UserProfile {
     'journey_start_date': journeyStartDate?.toIso8601String().split('T').first,
     'current_day': currentDay,
     'onboarding_completed': onboardingCompleted,
+    'assessment_completed': assessmentCompleted,
+    'assessment_result': assessmentResult,
     'total_sessions': totalSessions,
     'total_minutes': totalMinutes,
   };
@@ -93,6 +101,8 @@ class UserProfile {
     DateTime? journeyStartDate,
     int? currentDay,
     bool? onboardingCompleted,
+    bool? assessmentCompleted,
+    Map<String, dynamic>? assessmentResult,
     int? totalSessions,
     int? totalMinutes,
   }) {
@@ -109,6 +119,8 @@ class UserProfile {
       journeyStartDate: journeyStartDate ?? this.journeyStartDate,
       currentDay: currentDay ?? this.currentDay,
       onboardingCompleted: onboardingCompleted ?? this.onboardingCompleted,
+      assessmentCompleted: assessmentCompleted ?? this.assessmentCompleted,
+      assessmentResult: assessmentResult ?? this.assessmentResult,
       totalSessions: totalSessions ?? this.totalSessions,
       totalMinutes: totalMinutes ?? this.totalMinutes,
       createdAt: createdAt,
