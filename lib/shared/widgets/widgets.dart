@@ -1,4 +1,5 @@
 export 'boloo_button.dart';
+export 'maya_avatar.dart';
 export 'boloo_card.dart';
 export 'phase_badge.dart';
 export 'score_pill.dart';

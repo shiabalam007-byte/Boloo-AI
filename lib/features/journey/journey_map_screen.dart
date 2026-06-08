@@ -38,7 +38,7 @@ class JourneyMapScreen extends ConsumerWidget {
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(4),
                         child: LinearProgressIndicator(
-                          value: currentDay / 30,
+                          value: (currentDay / 90).clamp(0.0, 1.0),
                           backgroundColor: AppColors.borderSubtle,
                           valueColor: const AlwaysStoppedAnimation(AppColors.brandPurple),
                           minHeight: 6,
@@ -47,7 +47,7 @@ class JourneyMapScreen extends ConsumerWidget {
                     ),
                     const SizedBox(width: AppDimensions.md),
                     Text(
-                      'Day $currentDay / 30',
+                      'Day $currentDay / 90',
                       style: AppTypography.caption.copyWith(
                         color: AppColors.lightPurple,
                       ),
@@ -111,7 +111,11 @@ class JourneyMapScreen extends ConsumerWidget {
             onTap: (day) {
               final status = progress[day.dayNumber] ?? DayStatus.locked;
               if (status != DayStatus.locked) {
-                context.push('/session/setup');
+                context.push('/session/voice', extra: <String, dynamic>{
+                  'topic': day.titleEn,
+                  'scenario': day.scenarioPrompt,
+                  'journeyDay': day.dayNumber,
+                });
               }
             },
           );

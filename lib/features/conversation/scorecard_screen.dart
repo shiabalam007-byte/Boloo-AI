@@ -6,6 +6,7 @@ import '../../app/theme/typography.dart';
 import '../../app/theme/dimensions.dart';
 import '../../models/conversation.dart';
 import '../../shared/widgets/boloo_button.dart';
+import '../../shared/widgets/maya_avatar.dart';
 
 class ScorecardScreen extends ConsumerStatefulWidget {
   const ScorecardScreen({
@@ -190,27 +191,7 @@ class _ScorecardScreenState extends ConsumerState<ScorecardScreen>
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [AppColors.blue, AppColors.brandPurple],
-              ),
-              shape: BoxShape.circle,
-            ),
-            child: const Center(
-              child: Text(
-                'M',
-                style: TextStyle(
-                  fontFamily: 'PlusJakartaSans',
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ),
+          const MayaAvatar(state: MayaState.idle, size: 36),
           const SizedBox(width: AppDimensions.md),
           Expanded(
             child: Column(

@@ -10,13 +10,12 @@ import '../features/auth/auth_screen.dart';
 import '../features/auth/phone_auth_screen.dart';
 import '../features/auth/email_auth_screen.dart';
 import '../features/onboarding/onboarding_flow.dart';
+import '../features/onboarding/maya_welcome_screen.dart';
 import '../features/assessment/assessment_screen.dart';
 import '../features/assessment/assessment_result_screen.dart';
 import '../features/paywall/paywall_screen.dart';
 import '../features/dashboard/dashboard_screen.dart';
-import '../features/conversation/session_setup_screen.dart';
 import '../features/conversation/voice_session_screen.dart';
-import '../features/conversation/text_session_screen.dart';
 import '../features/conversation/scorecard_screen.dart';
 import '../features/journey/journey_map_screen.dart';
 import '../features/progress/progress_screen.dart';
@@ -44,6 +43,7 @@ class _AppGateNotifier extends ChangeNotifier {
 // Routes accessible without a subscription
 const _kFreeRoutes = [
   '/onboarding',
+  '/maya-welcome',
   '/assessment',
   '/assessment-result',
   '/paywall',
@@ -73,14 +73,20 @@ final routerProvider = Provider<GoRouter>((ref) {
         return loc.startsWith('/auth') ? null : '/auth';
       }
 
-      // Authenticated on auth route → decide destination
+      // Authenticated user on auth route → decide destination
       if (loc.startsWith('/auth')) {
-        final profile = ref.read(userProfileNotifierProvider).value;
-        if (profile == null) return '/dashboard'; // profile still loading
+        final profileAsync = ref.read(userProfileNotifierProvider);
+
+        // Profile still loading — stay on a neutral path until resolved
+        if (profileAsync.isLoading) return '/splash';
+
+        final profile = profileAsync.value;
+        if (profile == null) return '/onboarding';
+
         if (!profile.onboardingCompleted) return '/onboarding';
-        final hasSub = ref.read(hasSubscriptionProvider).value ?? true;
-        // Assessment gate: skip for subscribed users (already committed)
-        if (!profile.assessmentCompleted && !hasSub) return '/assessment';
+
+        final hasSub = ref.read(hasSubscriptionProvider).value ?? false;
+        if (!profile.assessmentCompleted && !hasSub) return '/maya-welcome';
         return hasSub ? '/dashboard' : '/paywall';
       }
 
@@ -88,14 +94,18 @@ final routerProvider = Provider<GoRouter>((ref) {
       if (_kFreeRoutes.any((r) => loc.startsWith(r))) return null;
 
       // Protected routes — gate check
-      final profile = ref.read(userProfileNotifierProvider).value;
+      final profileAsync = ref.read(userProfileNotifierProvider);
+      if (profileAsync.isLoading) return null; // let it load, don't bounce
+
+      final profile = profileAsync.value;
       if (profile != null && !profile.onboardingCompleted) return '/onboarding';
 
-      // Assessment gate only applies to unsubscribed users (new funnel).
-      // Subscribed users bypass it — they already paid and must reach dashboard.
       final hasSubAsync = ref.read(hasSubscriptionProvider);
       final isSubscribed = hasSubAsync.hasValue && hasSubAsync.value == true;
-      if (profile != null && !profile.assessmentCompleted && !isSubscribed) return '/assessment';
+
+      if (profile != null && !profile.assessmentCompleted && !isSubscribed) {
+        return '/maya-welcome';
+      }
 
       if (hasSubAsync.hasValue && hasSubAsync.value == false) return '/paywall';
 
@@ -107,6 +117,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/auth/phone', builder: (_, __) => const PhoneAuthScreen()),
       GoRoute(path: '/auth/email', builder: (_, __) => const EmailAuthScreen()),
       GoRoute(path: '/onboarding', builder: (_, __) => const OnboardingFlow()),
+      GoRoute(path: '/maya-welcome', builder: (_, __) => const MayaWelcomeScreen()),
       GoRoute(path: '/assessment', builder: (_, __) => const AssessmentScreen()),
       GoRoute(path: '/assessment-result', builder: (_, __) => const AssessmentResultScreen()),
       GoRoute(path: '/paywall', builder: (_, __) => const PaywallScreen()),
@@ -119,18 +130,12 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(path: '/profile', builder: (_, __) => const ProfileScreen()),
         ],
       ),
-      GoRoute(path: '/session/setup', builder: (_, __) => const SessionSetupScreen()),
       GoRoute(
-        path: '/session/voice/:conversationId',
-        builder: (_, state) => VoiceSessionScreen(
-          conversationId: state.pathParameters['conversationId']!,
-        ),
-      ),
-      GoRoute(
-        path: '/session/text/:conversationId',
-        builder: (_, state) => TextSessionScreen(
-          conversationId: state.pathParameters['conversationId']!,
-        ),
+        path: '/session/voice',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          return VoiceSessionScreen(sessionConfig: extra ?? const {});
+        },
       ),
       GoRoute(
         path: '/scorecard',
@@ -155,7 +160,9 @@ class MainShell extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: child,
-      bottomNavigationBar: BottomNavBar(location: GoRouterState.of(context).matchedLocation),
+      bottomNavigationBar: BottomNavBar(
+        location: GoRouterState.of(context).matchedLocation,
+      ),
     );
   }
 }

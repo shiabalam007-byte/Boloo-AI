@@ -103,6 +103,19 @@ class ConversationService {
     return (data as List).map((m) => ChatMessage.fromJson(m)).toList();
   }
 
+  Future<Conversation> getConversation(String conversationId) async {
+    try {
+      final data = await _client
+          .from('conversations')
+          .select()
+          .eq('id', conversationId)
+          .single();
+      return Conversation.fromJson(data);
+    } catch (e) {
+      throw ConversationException(e.toString());
+    }
+  }
+
   Future<List<Conversation>> getRecentSessions(String userId, {int limit = 10}) async {
     final data = await _client
         .from('conversations')

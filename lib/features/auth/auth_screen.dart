@@ -6,6 +6,7 @@ import '../../app/theme/typography.dart';
 import '../../app/theme/dimensions.dart';
 import '../../providers/auth_provider.dart';
 import '../../shared/widgets/boloo_button.dart';
+import '../../shared/widgets/maya_avatar.dart';
 
 class AuthScreen extends ConsumerStatefulWidget {
   const AuthScreen({super.key});
@@ -56,37 +57,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   Widget _buildHeroSection() {
     return Column(
       children: [
-        // Maya avatar placeholder — will be replaced with 3D character in Phase 2B
-        Container(
-          width: 100,
-          height: 100,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [AppColors.blue, AppColors.brandPurple],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(30),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.blue.withOpacity(0.25),
-                blurRadius: 24,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          child: const Center(
-            child: Text(
-              'M',
-              style: TextStyle(
-                fontFamily: 'PlusJakartaSans',
-                fontSize: 52,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ),
+        const MayaAvatar(state: MayaState.idle, size: 88),
         const SizedBox(height: AppDimensions.lg),
         const Text(
           'Speak With Confidence.',

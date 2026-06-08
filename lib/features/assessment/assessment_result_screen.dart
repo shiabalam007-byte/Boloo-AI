@@ -7,6 +7,7 @@ import '../../app/theme/typography.dart';
 import '../../app/theme/dimensions.dart';
 import '../../providers/assessment_provider.dart';
 import '../../providers/user_provider.dart';
+import '../../shared/widgets/maya_avatar.dart';
 
 class AssessmentResultScreen extends ConsumerWidget {
   const AssessmentResultScreen({super.key});
@@ -45,7 +46,7 @@ class AssessmentResultScreen extends ConsumerWidget {
             elevation: 0,
             title: Row(
               children: [
-                _MayaAvatar(),
+                const MayaAvatar(state: MayaState.idle, size: 36),
                 const SizedBox(width: 10),
                 const Text('Maya', style: AppTypography.h3),
               ],
@@ -501,25 +502,3 @@ class _BlurLock extends StatelessWidget {
   }
 }
 
-class _MayaAvatar extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 36, height: 36,
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [AppColors.blue, AppColors.brandPurple],
-        ),
-        shape: BoxShape.circle,
-      ),
-      child: const Center(
-        child: Text('M', style: TextStyle(
-          fontFamily: 'PlusJakartaSans',
-          fontSize: 16,
-          fontWeight: FontWeight.w700,
-          color: Colors.white,
-        )),
-      ),
-    );
-  }
-}

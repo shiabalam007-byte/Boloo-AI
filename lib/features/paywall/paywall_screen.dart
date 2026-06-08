@@ -9,6 +9,7 @@ import '../../providers/subscription_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../shared/widgets/boloo_button.dart';
+import '../../shared/widgets/maya_avatar.dart';
 
 class PaywallScreen extends ConsumerStatefulWidget {
   const PaywallScreen({super.key});
@@ -62,6 +63,11 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final profile = ref.watch(userProfileNotifierProvider).value;
+    final assessmentResult = profile?.assessmentResult;
+    final opportunity = assessmentResult?['biggest_opportunity'] as String?;
+    final recommendation = assessmentResult?['recommendation'] as String?;
+
     return Scaffold(
       backgroundColor: AppColors.bgPage,
       appBar: AppBar(
@@ -79,6 +85,8 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            _buildMayaSection(opportunity, recommendation),
+            const SizedBox(height: AppDimensions.lg),
             _buildHeader(),
             const SizedBox(height: AppDimensions.xl),
             _buildFeatures(),
@@ -103,6 +111,38 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildMayaSection(String? opportunity, String? recommendation) {
+    final displayText = recommendation ??
+        opportunity ??
+        "I've analyzed your goals. Here's your personalized 90-day plan.";
+
+    return Column(
+      children: [
+        const Center(child: MayaAvatar(state: MayaState.idle, size: 80)),
+        const SizedBox(height: AppDimensions.md),
+        Container(
+          padding: const EdgeInsets.all(AppDimensions.md),
+          decoration: BoxDecoration(
+            color: AppColors.blueLight,
+            borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
+            border: Border.all(color: AppColors.blue.withOpacity(0.2)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Maya says',
+                style: AppTypography.caption.copyWith(color: AppColors.blue),
+              ),
+              const SizedBox(height: 4),
+              Text(displayText, style: AppTypography.bodyLarge),
+            ],
+          ),
+        ),
+      ],
     );
   }
 

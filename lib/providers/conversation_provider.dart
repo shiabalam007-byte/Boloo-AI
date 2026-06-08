@@ -177,6 +177,24 @@ class ActiveConversationNotifier extends StateNotifier<ActiveConversationState> 
     }
   }
 
+  Future<void> loadSession(String conversationId) async {
+    state = state.copyWith(isLoading: true);
+    try {
+      final messages = await _ref
+          .read(conversationServiceProvider)
+          .getMessages(conversationId);
+      final convo = await _ref
+          .read(conversationServiceProvider)
+          .getConversation(conversationId);
+      state = ActiveConversationState(
+        conversation: convo,
+        messages: messages,
+      );
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+    }
+  }
+
   void clearSession() {
     state = const ActiveConversationState();
   }

@@ -6,6 +6,7 @@ import '../../app/theme/typography.dart';
 import '../../app/theme/dimensions.dart';
 import '../../providers/user_provider.dart';
 import '../../shared/widgets/boloo_button.dart';
+import '../../shared/widgets/maya_avatar.dart';
 
 class OnboardingFlow extends ConsumerStatefulWidget {
   const OnboardingFlow({super.key});
@@ -27,7 +28,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
       occupation: null,
       dailyCommitmentMin: 15,
     );
-    if (mounted) context.go('/assessment');
+    if (mounted) context.go('/maya-welcome');
   }
 
   @override
@@ -71,33 +72,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
   Widget _buildMayaIntro() {
     return Row(
       children: [
-        Container(
-          width: 56,
-          height: 56,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [AppColors.blue, AppColors.brandPurple],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.blue.withOpacity(0.25),
-                blurRadius: 16,
-                spreadRadius: 2,
-              ),
-            ],
-          ),
-          child: const Center(
-            child: Text('M', style: TextStyle(
-              fontFamily: 'PlusJakartaSans',
-              fontSize: 26,
-              fontWeight: FontWeight.w700,
-              color: Colors.white,
-            )),
-          ),
-        ),
+        const MayaAvatar(state: MayaState.idle, size: 52),
         const SizedBox(width: AppDimensions.md),
         Expanded(
           child: Container(
