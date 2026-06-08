@@ -42,7 +42,7 @@ serve(async (req) => {
       return_url: 'boloo://payment/return',
       cancel_url: 'boloo://payment/cancel',
       webhook_url: webhookUrl,
-      description: 'BOLOO AI 30-Day Career Accelerator',
+      description: 'BOLOO AI 90-Day Career Accelerator',
     }
 
     const response = await fetch(`${zinnipayBaseUrl}/payment/create`, {

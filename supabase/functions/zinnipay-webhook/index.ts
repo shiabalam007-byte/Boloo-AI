@@ -62,7 +62,7 @@ serve(async (req) => {
       if (payment?.user_id) {
         const now = new Date()
         const expiresAt = new Date(now)
-        expiresAt.setDate(expiresAt.getDate() + 180)
+        expiresAt.setDate(expiresAt.getDate() + 90)
 
         await supabase.from('subscriptions').insert({
           user_id: payment.user_id,

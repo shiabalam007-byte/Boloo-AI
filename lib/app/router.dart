@@ -78,8 +78,9 @@ final routerProvider = Provider<GoRouter>((ref) {
         final profile = ref.read(userProfileNotifierProvider).value;
         if (profile == null) return '/dashboard'; // profile still loading
         if (!profile.onboardingCompleted) return '/onboarding';
-        if (!profile.assessmentCompleted) return '/assessment';
         final hasSub = ref.read(hasSubscriptionProvider).value ?? true;
+        // Assessment gate: skip for subscribed users (already committed)
+        if (!profile.assessmentCompleted && !hasSub) return '/assessment';
         return hasSub ? '/dashboard' : '/paywall';
       }
 
@@ -89,9 +90,13 @@ final routerProvider = Provider<GoRouter>((ref) {
       // Protected routes — gate check
       final profile = ref.read(userProfileNotifierProvider).value;
       if (profile != null && !profile.onboardingCompleted) return '/onboarding';
-      if (profile != null && !profile.assessmentCompleted) return '/assessment';
 
+      // Assessment gate only applies to unsubscribed users (new funnel).
+      // Subscribed users bypass it — they already paid and must reach dashboard.
       final hasSubAsync = ref.read(hasSubscriptionProvider);
+      final isSubscribed = hasSubAsync.hasValue && hasSubAsync.value == true;
+      if (profile != null && !profile.assessmentCompleted && !isSubscribed) return '/assessment';
+
       if (hasSubAsync.hasValue && hasSubAsync.value == false) return '/paywall';
 
       return null;

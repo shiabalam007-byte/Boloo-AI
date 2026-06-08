@@ -64,6 +64,9 @@ class AssessmentNotifier extends StateNotifier<AssessmentState> {
   static const int _totalQuestions = 4;
 
   Future<void> startAssessment() async {
+    // Prevent duplicate starts if already active or complete
+    if (state.status != AssessmentStatus.idle && state.status != AssessmentStatus.error) return;
+
     final user = _ref.read(currentUserProvider);
     if (user == null) return;
 
