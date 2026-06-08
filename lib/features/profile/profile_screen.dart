@@ -157,7 +157,7 @@ class _ProfileHeader extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  'Day ${profile.currentDay} of 30',
+                  'Day ${profile.currentDay} of 90',
                   style: AppTypography.micro.copyWith(color: AppColors.lightPurple),
                 ),
               ),

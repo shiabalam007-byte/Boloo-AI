@@ -116,7 +116,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text(
-            '🚀 30-Day Career Accelerator',
+            '🚀 90-Day Career Accelerator',
             style: AppTypography.caption.copyWith(color: AppColors.lightPurple),
           ),
         ),
@@ -133,7 +133,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
 
   Widget _buildFeatures() {
     const features = [
-      ('🤖', '30 AI-Powered Sessions', 'Daily practice with Maya, your personal coach'),
+      ('🤖', '90 AI-Powered Sessions', 'Daily practice with Maya, your personal coach'),
       ('🎯', 'Career-Focused Topics', 'Interviews, freelancing, corporate communication'),
       ('📊', 'Real Progress Scores', 'Confidence, fluency & communication scores'),
       ('🗣️', 'Voice + Text Practice', 'Speak or type — practice your way'),

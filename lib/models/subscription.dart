@@ -26,7 +26,9 @@ class Subscription {
   final String? paymentId;
   final DateTime? createdAt;
 
-  bool get isActive => status == SubscriptionStatus.active;
+  bool get isActive =>
+      status == SubscriptionStatus.active &&
+      (expiresAt == null || expiresAt!.isAfter(DateTime.now()));
 
   factory Subscription.fromJson(Map<String, dynamic> json) {
     return Subscription(

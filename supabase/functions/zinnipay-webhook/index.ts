@@ -1,4 +1,3 @@
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
@@ -22,7 +21,7 @@ async function verifyHmacSha256(secret: string, message: string, signature: stri
   return crypto.subtle.verify('HMAC', key, sigBytes, enc.encode(message))
 }
 
-serve(async (req) => {
+Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
@@ -66,7 +65,7 @@ serve(async (req) => {
 
         await supabase.from('subscriptions').insert({
           user_id: payment.user_id,
-          plan_type: 'accelerator_30',
+          plan_type: 'accelerator_90',
           status: 'active',
           amount_bdt: amount / 100,
           payment_id: order_id,
