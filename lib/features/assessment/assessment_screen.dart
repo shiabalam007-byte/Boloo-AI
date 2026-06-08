@@ -104,7 +104,7 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
             _ScoringBanner(),
           Expanded(
             child: state.messages.isEmpty
-                ? _buildLoadingState()
+                ? _buildEmptyState(state)
                 : ListView.builder(
                     controller: _scrollController,
                     padding: const EdgeInsets.all(AppDimensions.md),
@@ -123,7 +123,56 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
     );
   }
 
-  Widget _buildLoadingState() {
+  Widget _buildEmptyState(AssessmentState state) {
+    if (state.status == AssessmentStatus.error) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppDimensions.xl),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.signal_wifi_statusbar_connected_no_internet_4_rounded,
+                  color: AppColors.textTertiary, size: 52),
+              const SizedBox(height: AppDimensions.lg),
+              const Text('Could not reach Maya', style: AppTypography.h2),
+              const SizedBox(height: AppDimensions.sm),
+              Text(
+                state.error?.replaceFirst('ConversationException: ', '') ??
+                    'Please check your internet connection and try again.',
+                style: AppTypography.body.copyWith(color: AppColors.textSecondary),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: AppDimensions.xl),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    ref.read(assessmentProvider.notifier).reset();
+                    Future.microtask(
+                        () => ref.read(assessmentProvider.notifier).startAssessment());
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.brandPurple,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
+                    ),
+                  ),
+                  child: const Text('Try Again',
+                      style: TextStyle(
+                        fontFamily: 'PlusJakartaSans',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      )),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return const Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
