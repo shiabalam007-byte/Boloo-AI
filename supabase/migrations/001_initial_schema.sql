@@ -57,7 +57,7 @@ CREATE TABLE public.subscriptions (
                 CHECK (plan_type IN ('accelerator_30')),
   status        TEXT DEFAULT 'pending'
                 CHECK (status IN ('pending','active','expired','cancelled')),
-  amount_bdt    INT DEFAULT 2999,
+  amount_bdt    INT DEFAULT 1999,
   payment_id    UUID REFERENCES public.payments(id),
   started_at    TIMESTAMPTZ,
   expires_at    TIMESTAMPTZ,

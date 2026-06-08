@@ -1,0 +1,602 @@
+-- =====================================================================
+-- BOLOO AI — Complete Database Setup
+-- Run this entire script in: Supabase Dashboard → SQL Editor → Run All
+-- =====================================================================
+
+-- =============================================
+-- BOLOO AI — Initial Database Schema
+-- =============================================
+
+-- Enable UUID extension
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- =============================================
+-- USER PROFILES (extends auth.users)
+-- =============================================
+CREATE TABLE public.user_profiles (
+  id                    UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  full_name             TEXT,
+  avatar_url            TEXT,
+  phone                 TEXT,
+  language_preference   TEXT DEFAULT 'mixed'
+                        CHECK (language_preference IN ('bangla','english','mixed')),
+  primary_goal          TEXT
+                        CHECK (primary_goal IN ('jobInterview','freelancing','corporate','ielts','abroad')),
+  english_level         TEXT
+                        CHECK (english_level IN ('beginner','intermediate','upperIntermediate')),
+  occupation            TEXT,
+  daily_commitment_min  INT DEFAULT 15,
+  journey_start_date    DATE,
+  current_day           INT DEFAULT 1,
+  onboarding_completed  BOOLEAN DEFAULT FALSE,
+  total_sessions        INT DEFAULT 0,
+  total_minutes         INT DEFAULT 0,
+  created_at            TIMESTAMPTZ DEFAULT NOW(),
+  updated_at            TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- =============================================
+-- PAYMENTS
+-- =============================================
+CREATE TABLE public.payments (
+  id                UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id           UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  amount_bdt        INT NOT NULL,
+  currency          TEXT DEFAULT 'BDT',
+  gateway           TEXT DEFAULT 'zinnipay',
+  payment_method    TEXT,
+  transaction_id    TEXT UNIQUE,
+  gateway_response  JSONB,
+  status            TEXT DEFAULT 'pending'
+                    CHECK (status IN ('pending','success','failed','refunded')),
+  created_at        TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- =============================================
+-- SUBSCRIPTIONS
+-- =============================================
+CREATE TABLE public.subscriptions (
+  id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id       UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  plan_type     TEXT DEFAULT 'accelerator_30'
+                CHECK (plan_type IN ('accelerator_30')),
+  status        TEXT DEFAULT 'pending'
+                CHECK (status IN ('pending','active','expired','cancelled')),
+  amount_bdt    INT DEFAULT 1999,
+  payment_id    UUID REFERENCES public.payments(id),
+  started_at    TIMESTAMPTZ,
+  expires_at    TIMESTAMPTZ,
+  created_at    TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- =============================================
+-- CONVERSATIONS (SESSIONS)
+-- =============================================
+CREATE TABLE public.conversations (
+  id                    UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id               UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  session_type          TEXT DEFAULT 'daily_challenge'
+                        CHECK (session_type IN ('daily_challenge','free_practice')),
+  mode                  TEXT DEFAULT 'text'
+                        CHECK (mode IN ('voice','text')),
+  journey_day           INT,
+  topic                 TEXT,
+  scenario              TEXT,
+  started_at            TIMESTAMPTZ DEFAULT NOW(),
+  ended_at              TIMESTAMPTZ,
+  duration_sec          INT,
+  message_count         INT DEFAULT 0,
+  confidence_score      NUMERIC(5,2),
+  fluency_score         NUMERIC(5,2),
+  communication_score   NUMERIC(5,2),
+  overall_score         NUMERIC(5,2),
+  maya_feedback         TEXT,
+  created_at            TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- =============================================
+-- MESSAGES
+-- =============================================
+CREATE TABLE public.messages (
+  id                UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  conversation_id   UUID NOT NULL REFERENCES public.conversations(id) ON DELETE CASCADE,
+  role              TEXT NOT NULL CHECK (role IN ('user','maya')),
+  content           TEXT NOT NULL,
+  audio_url         TEXT,
+  duration_ms       INT,
+  word_count        INT,
+  created_at        TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- =============================================
+-- STREAKS
+-- =============================================
+CREATE TABLE public.streaks (
+  user_id             UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  current_streak      INT DEFAULT 0,
+  longest_streak      INT DEFAULT 0,
+  last_practice_date  DATE,
+  total_active_days   INT DEFAULT 0,
+  updated_at          TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- =============================================
+-- SCORE HISTORY (for charts)
+-- =============================================
+CREATE TABLE public.score_history (
+  id                    UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id               UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  conversation_id       UUID NOT NULL REFERENCES public.conversations(id) ON DELETE CASCADE,
+  confidence_score      NUMERIC(5,2),
+  fluency_score         NUMERIC(5,2),
+  communication_score   NUMERIC(5,2),
+  overall_score         NUMERIC(5,2),
+  recorded_at           TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- =============================================
+-- CURRICULUM DAYS (admin-seeded)
+-- =============================================
+CREATE TABLE public.curriculum_days (
+  day_number            INT PRIMARY KEY,
+  week_number           INT NOT NULL,
+  phase                 TEXT NOT NULL,
+  title_en              TEXT NOT NULL,
+  title_bn              TEXT NOT NULL,
+  description_en        TEXT,
+  description_bn        TEXT,
+  scenario_type         TEXT NOT NULL,
+  scenario_prompt       TEXT NOT NULL,
+  learning_objectives   TEXT[] DEFAULT '{}',
+  key_phrases           TEXT[] DEFAULT '{}',
+  difficulty            INT DEFAULT 1 CHECK (difficulty BETWEEN 1 AND 5),
+  estimated_min         INT DEFAULT 15,
+  is_milestone          BOOLEAN DEFAULT FALSE
+);
+
+-- =============================================
+-- USER JOURNEY PROGRESS
+-- =============================================
+CREATE TABLE public.user_journey_progress (
+  id                UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id           UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  day_number        INT NOT NULL REFERENCES public.curriculum_days(day_number),
+  status            TEXT DEFAULT 'locked'
+                    CHECK (status IN ('locked','unlocked','completed')),
+  conversation_id   UUID REFERENCES public.conversations(id),
+  completed_at      TIMESTAMPTZ,
+  UNIQUE(user_id, day_number)
+);
+
+-- =============================================
+-- INDEXES
+-- =============================================
+CREATE INDEX idx_conversations_user_id ON public.conversations(user_id);
+CREATE INDEX idx_conversations_created_at ON public.conversations(created_at DESC);
+CREATE INDEX idx_messages_conversation_id ON public.messages(conversation_id);
+CREATE INDEX idx_score_history_user_id ON public.score_history(user_id);
+CREATE INDEX idx_score_history_recorded_at ON public.score_history(recorded_at DESC);
+CREATE INDEX idx_user_journey_user_id ON public.user_journey_progress(user_id);
+CREATE INDEX idx_subscriptions_user_id ON public.subscriptions(user_id);
+CREATE INDEX idx_payments_user_id ON public.payments(user_id);
+
+-- =============================================
+-- UPDATED_AT TRIGGER
+-- =============================================
+CREATE OR REPLACE FUNCTION public.handle_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER set_updated_at
+  BEFORE UPDATE ON public.user_profiles
+  FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
+
+-- =============================================
+-- AUTO-CREATE USER PROFILE ON SIGNUP
+-- =============================================
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.user_profiles (id, full_name, avatar_url)
+  VALUES (
+    NEW.id,
+    NEW.raw_user_meta_data->>'full_name',
+    NEW.raw_user_meta_data->>'avatar_url'
+  );
+
+  INSERT INTO public.streaks (user_id)
+  VALUES (NEW.id);
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- =============================================
+-- BOLOO AI — Row Level Security Policies
+-- =============================================
+
+-- USER PROFILES
+ALTER TABLE public.user_profiles ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "users_read_own_profile" ON public.user_profiles
+  FOR SELECT USING (auth.uid() = id);
+
+CREATE POLICY "users_update_own_profile" ON public.user_profiles
+  FOR UPDATE USING (auth.uid() = id);
+
+-- SUBSCRIPTIONS
+ALTER TABLE public.subscriptions ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "users_read_own_subscription" ON public.subscriptions
+  FOR SELECT USING (auth.uid() = user_id);
+
+-- PAYMENTS
+ALTER TABLE public.payments ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "users_read_own_payments" ON public.payments
+  FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "users_create_own_payments" ON public.payments
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+-- CONVERSATIONS
+ALTER TABLE public.conversations ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "users_crud_own_conversations" ON public.conversations
+  USING (auth.uid() = user_id);
+
+-- MESSAGES
+ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "users_crud_own_messages" ON public.messages
+  USING (
+    conversation_id IN (
+      SELECT id FROM public.conversations WHERE user_id = auth.uid()
+    )
+  );
+
+-- STREAKS
+ALTER TABLE public.streaks ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "users_crud_own_streaks" ON public.streaks
+  USING (auth.uid() = user_id);
+
+-- SCORE HISTORY
+ALTER TABLE public.score_history ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "users_read_own_scores" ON public.score_history
+  FOR SELECT USING (auth.uid() = user_id);
+
+-- USER JOURNEY PROGRESS
+ALTER TABLE public.user_journey_progress ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "users_crud_own_journey" ON public.user_journey_progress
+  USING (auth.uid() = user_id);
+
+-- CURRICULUM DAYS (public read for authenticated users)
+ALTER TABLE public.curriculum_days ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "authenticated_read_curriculum" ON public.curriculum_days
+  FOR SELECT TO authenticated USING (true);
+
+-- =============================================
+-- BOLOO AI — 30-Day Curriculum Seed Data
+-- =============================================
+
+INSERT INTO public.curriculum_days 
+  (day_number, week_number, phase, title_en, title_bn, description_en, description_bn, 
+   scenario_type, scenario_prompt, learning_objectives, key_phrases, difficulty, estimated_min, is_milestone)
+VALUES
+
+-- WEEK 1: FOUNDATION
+(1, 1, 'foundation', 
+ 'Introduce Yourself', 'নিজেকে পরিচয় দিন',
+ 'Learn to introduce yourself professionally in English',
+ 'ইংরেজিতে পেশাদারভাবে নিজেকে পরিচয় দিতে শিখুন',
+ 'self_introduction',
+ 'You are meeting someone at a professional networking event in Dhaka. Introduce yourself, mention your name, what you do, and one thing you are working on. Be confident and friendly.',
+ ARRAY['Introduce yourself clearly', 'State your profession', 'Express one current goal'],
+ ARRAY['My name is...', 'I work as...', 'Currently I am working on...', 'Nice to meet you'],
+ 1, 10, false),
+
+(2, 1, 'foundation',
+ 'Talk About Your Work', 'আপনার কাজ নিয়ে কথা বলুন',
+ 'Describe your job and daily responsibilities in English',
+ 'ইংরেজিতে আপনার চাকরি ও দৈনন্দিন কাজ বর্ণনা করুন',
+ 'work_description',
+ 'A new international colleague asks you: "What does your job involve day-to-day?" Describe your work, your team, and what you enjoy about your role.',
+ ARRAY['Describe job responsibilities', 'Use present tense naturally', 'Express enthusiasm'],
+ ARRAY['I am responsible for...', 'My role involves...', 'I work with a team of...', 'What I enjoy most is...'],
+ 1, 12, false),
+
+(3, 1, 'foundation',
+ 'Express Your Opinions', 'আপনার মতামত প্রকাশ করুন',
+ 'Learn to share your views confidently in English',
+ 'ইংরেজিতে আত্মবিশ্বাসের সাথে মতামত দিতে শিখুন',
+ 'opinion_sharing',
+ 'Your team is discussing whether remote work or office work is better. Share your opinion clearly and give at least two reasons to support your view.',
+ ARRAY['Express opinions directly', 'Support views with reasons', 'Agree/disagree politely'],
+ ARRAY['I think that...', 'In my opinion...', 'I believe...', 'The reason is...', 'I agree/disagree because...'],
+ 1, 12, false),
+
+(4, 1, 'foundation',
+ 'Ask and Answer Questions', 'প্রশ্ন করুন এবং উত্তর দিন',
+ 'Practice confident question-answering in professional settings',
+ 'পেশাদার পরিবেশে প্রশ্ন করা ও উত্তর দেওয়া অনুশীলন করুন',
+ 'qa_practice',
+ 'You are in a job interview. The interviewer asks you several questions about your background and skills. Answer each question confidently and ask one thoughtful question back.',
+ ARRAY['Answer questions completely', 'Ask relevant follow-up questions', 'Show confidence'],
+ ARRAY['That is a great question...', 'To answer that...', 'Could you tell me more about...', 'I would like to know...'],
+ 2, 15, false),
+
+(5, 1, 'foundation',
+ 'Talk About Your Goals', 'আপনার লক্ষ্য নিয়ে কথা বলুন',
+ 'Articulate your ambitions and career goals clearly',
+ 'স্পষ্টভাবে আপনার উচ্চাভিলাষ ও ক্যারিয়ার লক্ষ্য প্রকাশ করুন',
+ 'goals_ambitions',
+ 'An interviewer asks: "Where do you see yourself in 5 years?" Share your career ambitions, what you are doing to achieve them, and why this role fits your plans.',
+ ARRAY['Speak about future plans', 'Show ambition and drive', 'Connect goals to actions'],
+ ARRAY['My goal is to...', 'In five years, I see myself...', 'I am working towards...', 'This opportunity aligns with...'],
+ 2, 15, false),
+
+(6, 1, 'foundation',
+ 'Describe a Challenge', 'একটি চ্যালেঞ্জ বর্ণনা করুন',
+ 'Tell a story about overcoming a professional challenge',
+ 'একটি পেশাদার চ্যালেঞ্জ কাটিয়ে ওঠার গল্প বলুন',
+ 'challenge_story',
+ 'Tell me about a time you faced a difficult situation at work or in a project. What happened, what did you do, and what was the outcome?',
+ ARRAY['Structure a story clearly', 'Use past tense', 'Show problem-solving'],
+ ARRAY['The situation was...', 'I decided to...', 'As a result...', 'What I learned was...'],
+ 2, 15, false),
+
+(7, 1, 'foundation',
+ '★ WEEK 1 MILESTONE', '★ সপ্তাহ ১ মাইলস্টোন',
+ 'Week 1 review — celebrate your progress and practice everything learned',
+ 'সপ্তাহ ১ পর্যালোচনা — আপনার অগ্রগতি উদযাপন করুন',
+ 'milestone_review',
+ 'Let us do a fun full conversation! Introduce yourself, describe your work, share an opinion on a career topic, and tell me one goal you are excited about. This is a celebration session!',
+ ARRAY['Apply all Week 1 skills', 'Speak for longer stretches', 'Build confidence'],
+ ARRAY['It is great to be here', 'I feel more confident about...', 'This week I learned...'],
+ 2, 20, true),
+
+-- WEEK 2: PROFESSIONAL BASICS
+(8, 2, 'professional',
+ 'Professional Introductions', 'পেশাদার পরিচয়',
+ 'Master the art of introducing yourself in networking settings',
+ 'নেটওয়ার্কিং পরিবেশে নিজেকে পরিচয় দেওয়ার দক্ষতা আয়ত্ত করুন',
+ 'networking_intro',
+ 'You are at a tech industry event in Dhaka. You meet three different people: a potential client, a senior manager from another company, and a peer. Practice introducing yourself differently to each.',
+ ARRAY['Adapt intro for different audiences', 'Professional small talk', 'Exchange contact info naturally'],
+ ARRAY['It is a pleasure to meet you', 'I specialize in...', 'I would love to connect', 'Let me give you my card'],
+ 2, 15, false),
+
+(9, 2, 'professional',
+ 'Office Small Talk', 'অফিসে ছোট কথা বলুন',
+ 'Build rapport with colleagues through natural conversation',
+ 'স্বাভাবিক কথোপকথনের মাধ্যমে সহকর্মীদের সাথে সম্পর্ক গড়ুন',
+ 'small_talk',
+ 'It is Monday morning at the office. You bump into your manager in the elevator, then chat with a new colleague over coffee. Practice easy, natural small talk for both situations.',
+ ARRAY['Start conversations naturally', 'Keep topics appropriate', 'Listen and respond'],
+ ARRAY['How was your weekend?', 'Have you heard about...', 'I have been really busy with...', 'That sounds interesting!'],
+ 1, 12, false),
+
+(10, 2, 'professional',
+ 'Respond With Confidence', 'আত্মবিশ্বাসের সাথে উত্তর দিন',
+ 'Give clear, direct answers without hesitation',
+ 'দ্বিধা ছাড়াই স্পষ্ট ও সরাসরি উত্তর দিন',
+ 'confident_responses',
+ 'Practice answering these tough questions directly: "Why did you leave your last job?" and "What makes you better than other candidates?" Give direct, positive answers.',
+ ARRAY['Eliminate filler words', 'Answer directly without over-explaining', 'Sound positive'],
+ ARRAY['The main reason was...', 'I bring...', 'My strength is...', 'I am confident that...'],
+ 3, 15, false),
+
+(11, 2, 'professional',
+ 'Talk About Experience', 'অভিজ্ঞতা নিয়ে কথা বলুন',
+ 'Describe your professional experience impressively',
+ 'আপনার পেশাদার অভিজ্ঞতা চমৎকারভাবে বর্ণনা করুন',
+ 'experience_talk',
+ 'Walk me through your CV. Tell me about your most important work experiences, what you achieved, and what skills you gained. Make it sound impressive and genuine.',
+ ARRAY['Highlight achievements not just duties', 'Use numbers and impact', 'Stay concise'],
+ ARRAY['In my role at...', 'I was responsible for...', 'I achieved...', 'This taught me...'],
+ 2, 15, false),
+
+(12, 2, 'professional',
+ 'Professional Email Language', 'পেশাদার ইমেইল ভাষা',
+ 'Read professional emails aloud and respond verbally',
+ 'পেশাদার ইমেইল জোরে পড়ুন এবং মৌখিকভাবে উত্তর দিন',
+ 'email_language',
+ 'I will give you a professional email to read aloud, then we will practice how you would verbally summarize it and respond to it in a meeting.',
+ ARRAY['Read professional text clearly', 'Summarize information verbally', 'Professional email phrases'],
+ ARRAY['I am writing to follow up on...', 'Please find attached...', 'I look forward to...', 'Thank you for your consideration'],
+ 2, 15, false),
+
+(13, 2, 'professional',
+ 'Handle Misunderstandings', 'ভুল বোঝাবুঝি সামলান',
+ 'Learn to politely say you did not understand and ask for clarification',
+ 'বিনয়ের সাথে না বোঝার কথা বলুন ও স্পষ্টীকরণ চাইতে শিখুন',
+ 'clarification',
+ 'Your international colleague is explaining a complex process quickly. Practice politely stopping them, asking for clarification, and checking your understanding.',
+ ARRAY['Ask for clarification gracefully', 'Paraphrase to confirm understanding', 'Stay professional when confused'],
+ ARRAY['Could you clarify what you mean by...', 'So if I understand correctly...', 'Would you mind repeating that...', 'Just to confirm...'],
+ 2, 12, false),
+
+(14, 2, 'professional',
+ '★ 2-WEEK CHECKPOINT', '★ ২ সপ্তাহের চেকপয়েন্ট',
+ 'Compare your scores to Day 1 and celebrate your growth',
+ 'আপনার স্কোর ১ম দিনের সাথে তুলনা করুন এবং আপনার বৃদ্ধি উদযাপন করুন',
+ 'milestone_review',
+ 'Full conversation: Tell me who you are professionally, describe a recent work situation, share your career goals, and ask me any questions about improving your English communication.',
+ ARRAY['Demonstrate 2-week growth', 'Extended conversation', 'Natural flow'],
+ ARRAY['I have been practicing...', 'I notice I am more confident in...', 'I want to work on...'],
+ 3, 20, true),
+
+-- WEEK 3: INTERVIEW PREPARATION
+(15, 3, 'interview',
+ 'The Perfect Self-Introduction', 'নিখুঁত আত্মপরিচয়',
+ 'Craft and deliver your 90-second professional pitch',
+ 'আপনার ৯০ সেকেন্ডের পেশাদার পিচ তৈরি ও উপস্থাপন করুন',
+ 'self_pitch',
+ 'Practice your 90-second "Tell me about yourself" answer for a job interview. Cover: who you are, your key experience, your biggest strength, and why you are excited about this role.',
+ ARRAY['90-second structured answer', 'Highlight key strengths', 'Sound natural not rehearsed'],
+ ARRAY['I am a professional with X years of experience in...', 'My strongest skill is...', 'I am particularly excited about this role because...'],
+ 3, 15, false),
+
+(16, 3, 'interview',
+ 'Strength and Weakness Questions', 'শক্তি ও দুর্বলতার প্রশ্ন',
+ 'Answer the most feared interview questions with confidence',
+ 'সবচেয়ে ভয়ের ইন্টারভিউ প্রশ্নের উত্তর আত্মবিশ্বাসের সাথে দিন',
+ 'strength_weakness',
+ 'Answer: "What is your greatest strength?" and "What is your greatest weakness?" For strengths give evidence. For weakness show self-awareness and growth.',
+ ARRAY['Back up strengths with evidence', 'Turn weakness into growth story', 'Be honest not negative'],
+ ARRAY['My greatest strength is...and I demonstrated this when...', 'One area I am improving is...', 'I have been working on this by...'],
+ 3, 15, false),
+
+(17, 3, 'interview',
+ 'Why This Company?', 'কেন এই কোম্পানি?',
+ 'Research and articulate your motivation for specific companies',
+ 'নির্দিষ্ট কোম্পানির জন্য আপনার প্রেরণা গবেষণা ও প্রকাশ করুন',
+ 'company_motivation',
+ 'I am the interviewer. Tell me why you want to work at our software company, what you know about us, and how this role fits your career plan.',
+ ARRAY['Show company knowledge', 'Connect to personal goals', 'Sound genuine'],
+ ARRAY['I admire your company because...', 'I have been following your work on...', 'This role aligns with my goal of...'],
+ 3, 15, false),
+
+(18, 3, 'interview',
+ 'Behavioral Questions — STAR', 'আচরণমূলক প্রশ্ন — STAR পদ্ধতি',
+ 'Master the STAR method for behavioral interview questions',
+ 'আচরণমূলক ইন্টারভিউ প্রশ্নের জন্য STAR পদ্ধতি আয়ত্ত করুন',
+ 'star_method',
+ 'Answer this behavioral question using the STAR method: "Tell me about a time you had to work under pressure and meet a tight deadline. What did you do?"',
+ ARRAY['Apply STAR structure', 'Be specific not vague', 'Show clear outcome'],
+ ARRAY['The Situation was...', 'My Task was...', 'The Action I took was...', 'The Result was...'],
+ 3, 18, false),
+
+(19, 3, 'interview',
+ 'Salary Negotiation', 'বেতন আলোচনা',
+ 'Confidently discuss and negotiate your salary',
+ 'আত্মবিশ্বাসের সাথে আপনার বেতন নিয়ে আলোচনা করুন',
+ 'salary_negotiation',
+ 'The interviewer asks about your salary expectations. You currently earn 40,000 BDT and want 55,000 BDT. Practice negotiating professionally and confidently.',
+ ARRAY['State salary expectations clearly', 'Justify with market value', 'Negotiate without apologizing'],
+ ARRAY['Based on my experience and market research...', 'I am looking for a salary in the range of...', 'I am flexible but my expectation is...'],
+ 4, 15, false),
+
+(20, 3, 'interview',
+ 'Questions to Ask the Interviewer', 'ইন্টারভিউয়ারকে প্রশ্ন করুন',
+ 'Prepare smart, impressive questions for interviewers',
+ 'ইন্টারভিউয়ারের জন্য চতুর ও চিত্তাকর্ষক প্রশ্ন প্রস্তুত করুন',
+ 'candidate_questions',
+ 'The interview is ending and the interviewer asks: "Do you have any questions for us?" Practice asking 3 impressive questions that show your interest, research, and ambition.',
+ ARRAY['Ask meaningful questions', 'Show genuine interest', 'Avoid basic questions'],
+ ARRAY['What does success look like in this role?', 'What challenges is the team currently facing?', 'How would you describe the team culture?'],
+ 3, 12, false),
+
+(21, 3, 'interview',
+ '★ MOCK INTERVIEW — 30 MINUTES', '★ মক ইন্টারভিউ — ৩০ মিনিট',
+ 'Full job interview simulation from start to finish',
+ 'শুরু থেকে শেষ পর্যন্ত সম্পূর্ণ চাকরির ইন্টারভিউ সিমুলেশন',
+ 'full_interview_sim',
+ 'I am your interviewer for a Software Developer position at a leading Dhaka tech company. We will go through a full 30-minute interview: introduction, experience questions, behavioral questions, and your questions. This is a serious simulation — give it your best!',
+ ARRAY['Full interview performance', 'Apply all learned skills', 'Handle unexpected questions'],
+ ARRAY['I appreciate the opportunity to interview for this position', 'Based on my experience...', 'Thank you for your time today'],
+ 4, 30, true),
+
+-- WEEK 4: WORKPLACE COMMUNICATION
+(22, 4, 'workplace',
+ 'Participating in Meetings', 'মিটিংয়ে অংশগ্রহণ করুন',
+ 'Speak up confidently in team meetings',
+ 'টিম মিটিংয়ে আত্মবিশ্বাসের সাথে কথা বলুন',
+ 'meeting_participation',
+ 'You are in a team meeting. Practice: joining the conversation naturally, adding your input, agreeing and disagreeing professionally, and making a suggestion.',
+ ARRAY['Join conversation at right moment', 'Add value to discussion', 'Disagree respectfully'],
+ ARRAY['I would like to add...', 'Building on what you said...', 'I see it slightly differently...', 'What if we tried...'],
+ 3, 15, false),
+
+(23, 4, 'workplace',
+ 'Giving Status Updates', 'স্ট্যাটাস আপডেট দিন',
+ 'Report project progress clearly and professionally',
+ 'স্পষ্ট ও পেশাদারভাবে প্রজেক্টের অগ্রগতি রিপোর্ট করুন',
+ 'status_update',
+ 'Give a 3-minute status update on a project you are working on. Cover: what is done, what is in progress, any blockers, and what you need from the team.',
+ ARRAY['Structure updates clearly', 'Be concise', 'Flag blockers professionally'],
+ ARRAY['As of today...', 'We have completed...', 'Currently in progress...', 'One challenge we are facing is...', 'I need support with...'],
+ 2, 12, false),
+
+(24, 4, 'workplace',
+ 'Professional Requests', 'পেশাদার অনুরোধ',
+ 'Ask for help, extensions, and resources professionally',
+ 'পেশাদারভাবে সাহায্য, সময় বৃদ্ধি ও সম্পদ চাইতে শিখুন',
+ 'professional_requests',
+ 'Practice making three professional requests: 1) Asking your manager for a deadline extension, 2) Requesting support from a colleague, 3) Asking about training opportunities.',
+ ARRAY['Make requests politely but directly', 'Give context for requests', 'Follow up professionally'],
+ ARRAY['I would like to request...', 'Would it be possible to...', 'I was hoping you could help with...', 'I understand if it is not possible, but...'],
+ 3, 15, false),
+
+(25, 4, 'workplace',
+ 'Freelance Client Discovery Call', 'ফ্রিল্যান্স ক্লায়েন্ট ডিসকভারি কল',
+ 'Conduct a professional client discovery call on Upwork/Fiverr',
+ 'Upwork/Fiverr-এ পেশাদার ক্লায়েন্ট ডিসকভারি কল করুন',
+ 'freelance_discovery',
+ 'A US client on Upwork wants a 15-minute call to discuss a web development project. Lead the call: introduce yourself, ask the right questions about their project, explain your process, and close confidently.',
+ ARRAY['Lead client calls', 'Ask discovery questions', 'Close the call professionally'],
+ ARRAY['Thank you for taking the time to speak with me', 'To understand your project better...', 'My process typically involves...', 'Based on what you have told me...'],
+ 4, 18, false),
+
+(26, 4, 'workplace',
+ 'Handle Difficult Conversations', 'কঠিন কথোপকথন সামলান',
+ 'Navigate disagreements and conflict professionally',
+ 'পেশাদারভাবে মতবিরোধ ও দ্বন্দ্ব সামলান',
+ 'difficult_conversation',
+ 'A client is unhappy with your work and sends you an angry message. Practice a professional call response: acknowledge their concern, apologize appropriately, and propose a solution.',
+ ARRAY['De-escalate professionally', 'Acknowledge without over-apologizing', 'Propose solutions'],
+ ARRAY['I understand your concern...', 'I apologize for the inconvenience...', 'What I would like to propose is...', 'I will make this right by...'],
+ 4, 15, false),
+
+(27, 4, 'workplace',
+ 'Presentations — Structure and Delivery', 'প্রেজেন্টেশন — কাঠামো ও উপস্থাপনা',
+ 'Deliver a confident 3-minute presentation on a topic',
+ 'একটি বিষয়ে আত্মবিশ্বাসের সাথে ৩ মিনিটের প্রেজেন্টেশন দিন',
+ 'presentation',
+ 'Give a 3-minute presentation to your team on this topic: "Why our company should invest in better English communication training for employees." Structure it with an opening, 3 points, and a strong close.',
+ ARRAY['Open with impact', 'Use clear structure', 'Close with call to action'],
+ ARRAY['Good morning everyone. Today I want to talk about...', 'There are three key reasons...', 'In conclusion...', 'I would like to propose that we...'],
+ 4, 18, false),
+
+(28, 4, 'workplace',
+ '★ WEEK 4 MILESTONE', '★ সপ্তাহ ৪ মাইলস্টোন',
+ 'Full professional workplace simulation',
+ 'সম্পূর্ণ পেশাদার কর্মক্ষেত্র সিমুলেশন',
+ 'milestone_review',
+ 'Today we simulate a full workday in English. We will go through a morning standup, a client call, a manager check-in, and end with you presenting one idea to the team. Ready?',
+ ARRAY['Apply all workplace skills', 'Switch between contexts', 'Extended professional English'],
+ ARRAY['Let us get started', 'Moving on to...', 'Before we wrap up...'],
+ 4, 25, true),
+
+-- WEEK 5: CONFIDENCE BUILDING  
+(29, 5, 'confidence',
+ 'Eliminate Filler Words', 'ফিলার শব্দ দূর করুন',
+ 'Speak without "um", "uh", "like", and other fillers',
+ '"আম", "আহ" এবং অন্যান্য ফিলার ছাড়া কথা বলুন',
+ 'fluency_drill',
+ 'I will ask you random questions and you must answer without using any filler words. If you use one, we note it and try again. The goal is clean, confident speech.',
+ ARRAY['Eliminate filler words', 'Use pauses strategically', 'Slow down for clarity'],
+ ARRAY['(pause)', 'What I mean is...', 'Let me think for a moment...', 'To be specific...'],
+ 3, 15, false),
+
+(30, 5, 'confidence',
+ '★ DAY 30 — MONTH 1 COMPLETE!', '★ দিন ৩০ — প্রথম মাস সম্পন্ন!',
+ 'Celebrate 30 days of growth — compare Day 1 to today',
+ '৩০ দিনের বৃদ্ধি উদযাপন করুন — ১ম দিনের সাথে আজকে তুলনা করুন',
+ 'graduation_celebration',
+ 'This is your 30-day graduation! Let us have a free conversation where you show me how far you have come. Tell me about yourself, your work, your goals, and what this month has meant for your confidence. This is your moment!',
+ ARRAY['Demonstrate month-long growth', 'Free flowing confident conversation', 'Celebrate achievement'],
+ ARRAY['I feel much more confident now', 'What I have learned is...', 'My goal going forward is...', 'I am proud of my progress in...'],
+ 3, 20, true);
