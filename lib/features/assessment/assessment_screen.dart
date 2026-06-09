@@ -132,7 +132,7 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
       child: Row(
         children: [
           TextButton(
-            onPressed: () => context.canPop() ? context.pop() : context.go('/auth'),
+            onPressed: () => context.canPop() ? context.pop() : context.go('/maya-welcome'),
             child: Text(
               'Cancel',
               style: AppTypography.body.copyWith(
@@ -318,6 +318,17 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
     );
   }
 
+  String _friendlyErrorMessage(String? error) {
+    if (error == null) return 'Please check your internet connection and try again.';
+    if (error.contains('SocketException') || error.contains('TimeoutException')) {
+      return 'No internet connection. Please check your connection and try again.';
+    }
+    if (error.contains('rate') || error.contains('quota')) {
+      return 'Our AI coach is busy right now. Please try again in a moment.';
+    }
+    return 'Could not reach Maya. Please check your connection and try again.';
+  }
+
   Widget _buildErrorState(AssessmentState state) {
     return Padding(
       padding: const EdgeInsets.all(AppDimensions.xl),
@@ -332,8 +343,7 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
           ),
           const SizedBox(height: AppDimensions.sm),
           Text(
-            state.error?.replaceFirst('ConversationException: ', '') ??
-                'Please check your internet connection.',
+            _friendlyErrorMessage(state.error),
             style: AppTypography.body.copyWith(
               color: Colors.white.withOpacity(0.55),
             ),

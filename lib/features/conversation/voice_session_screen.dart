@@ -30,6 +30,7 @@ class _VoiceSessionScreenState extends ConsumerState<VoiceSessionScreen>
   String _liveTranscript = '';
   bool _sessionEnding = false;
   bool _sessionStarted = false;
+  bool _hasSessionError = false;
 
   @override
   void initState() {
@@ -65,6 +66,10 @@ class _VoiceSessionScreenState extends ConsumerState<VoiceSessionScreen>
     }
 
     if (!mounted) return;
+    if (ref.read(activeConversationProvider).error != null) {
+      setState(() => _hasSessionError = true);
+      return;
+    }
     setState(() => _sessionStarted = true);
     _sendInitialGreeting();
   }
@@ -73,8 +78,11 @@ class _VoiceSessionScreenState extends ConsumerState<VoiceSessionScreen>
     final response = await ref
         .read(activeConversationProvider.notifier)
         .sendUserMessage('[SESSION_START]');
-    if (response != null && mounted) {
+    if (!mounted) return;
+    if (response != null) {
       await _voiceService.speak(response);
+    } else {
+      setState(() => _hasSessionError = true);
     }
   }
 
@@ -82,19 +90,28 @@ class _VoiceSessionScreenState extends ConsumerState<VoiceSessionScreen>
     if (_voiceState == VoiceState.listening) {
       await _voiceService.stopListening();
     } else if (_voiceState == VoiceState.idle) {
-      setState(() => _liveTranscript = '');
+      setState(() {
+        _liveTranscript = '';
+        _hasSessionError = false;
+      });
       await _voiceService.startListening(onResult: _handleUserSpeech);
     }
   }
 
   Future<void> _handleUserSpeech(String text) async {
     if (text.trim().isEmpty) return;
-    setState(() => _liveTranscript = '');
+    setState(() {
+      _liveTranscript = '';
+      _hasSessionError = false;
+    });
     final response = await ref
         .read(activeConversationProvider.notifier)
         .sendUserMessage(text);
-    if (response != null && mounted) {
+    if (!mounted) return;
+    if (response != null) {
       await _voiceService.speak(response);
+    } else {
+      setState(() => _hasSessionError = true);
     }
   }
 
@@ -227,6 +244,10 @@ class _VoiceSessionScreenState extends ConsumerState<VoiceSessionScreen>
           _buildSpeechBubble('Starting session...')
         else if (isMayaTyping)
           _buildThinkingBubble()
+        else if (_hasSessionError)
+          _buildSpeechBubble(
+            'Maya lost connection. Check your internet and tap the mic to try again.',
+          )
         else if (lastMessage != null)
           _buildSpeechBubble(
             lastMessage.length > 200 ? '${lastMessage.substring(0, 200)}...' : lastMessage,

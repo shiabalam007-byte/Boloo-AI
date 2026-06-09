@@ -7,6 +7,7 @@ import '../../app/theme/dimensions.dart';
 import '../../providers/journey_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../models/curriculum_day.dart';
+import '../../shared/widgets/maya_avatar.dart';
 
 class JourneyMapScreen extends ConsumerWidget {
   const JourneyMapScreen({super.key});
@@ -93,6 +94,13 @@ class JourneyMapScreen extends ConsumerWidget {
     }
 
     final allSections = grouped.entries.toList();
+
+    if (allSections.isEmpty) {
+      return const SliverFillRemaining(
+        hasScrollBody: false,
+        child: _JourneyEmptyState(),
+      );
+    }
 
     // Find which phase index is currently active
     int activePhaseIndex = 0;
@@ -375,6 +383,35 @@ class _DayCard extends StatelessWidget {
                         : AppColors.textSecondary,
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _JourneyEmptyState extends StatelessWidget {
+  const _JourneyEmptyState();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(AppDimensions.xl),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const MayaAvatar(state: MayaState.idle, size: 80),
+          const SizedBox(height: AppDimensions.xl),
+          Text(
+            'Your learning journey\nis being prepared.',
+            style: AppTypography.h2.copyWith(color: AppColors.textSecondary),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: AppDimensions.sm),
+          Text(
+            'Check back in a moment.',
+            style: AppTypography.body.copyWith(color: AppColors.textTertiary),
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     );
   }

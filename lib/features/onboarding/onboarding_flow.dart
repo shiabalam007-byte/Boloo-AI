@@ -17,18 +17,24 @@ class OnboardingFlow extends ConsumerStatefulWidget {
 
 class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
   String _language = 'mixed';
+  String _goal = 'jobInterview';
+  String _level = 'intermediate';
   bool _saving = false;
 
   Future<void> _complete() async {
     setState(() => _saving = true);
-    await ref.read(userProfileNotifierProvider.notifier).completeOnboarding(
-      languagePreference: _language,
-      primaryGoal: 'jobInterview',
-      englishLevel: 'intermediate',
-      occupation: null,
-      dailyCommitmentMin: 15,
-    );
-    if (mounted) context.go('/maya-welcome');
+    try {
+      await ref.read(userProfileNotifierProvider.notifier).completeOnboarding(
+        languagePreference: _language,
+        primaryGoal: _goal,
+        englishLevel: _level,
+        occupation: null,
+        dailyCommitmentMin: 15,
+      );
+      if (mounted) context.go('/maya-welcome');
+    } catch (_) {
+      if (mounted) setState(() => _saving = false);
+    }
   }
 
   @override
@@ -36,34 +42,71 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
     return Scaffold(
       backgroundColor: AppColors.bgPage,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(AppDimensions.lg),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: AppDimensions.xl),
-              _buildMayaIntro(),
-              const SizedBox(height: AppDimensions.xl2),
-              Text(
-                'আপনি কোন ভাষায় কথা বলতে চান?',
-                style: AppTypography.h1,
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(AppDimensions.lg),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: AppDimensions.xl),
+                    _buildMayaIntro(),
+                    const SizedBox(height: AppDimensions.xl2),
+                    // Language preference
+                    Text(
+                      'আপনি কোন ভাষায় কথা বলতে চান?',
+                      style: AppTypography.h1,
+                    ),
+                    const SizedBox(height: AppDimensions.xs),
+                    Text(
+                      'Which language do you prefer with Maya?',
+                      style: AppTypography.body.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: AppDimensions.lg),
+                    _buildLanguageOptions(),
+                    const SizedBox(height: AppDimensions.xl2),
+                    // Primary goal
+                    Text("What's your main goal?", style: AppTypography.h1),
+                    const SizedBox(height: AppDimensions.xs),
+                    Text(
+                      'Choose the outcome you want most.',
+                      style: AppTypography.body.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: AppDimensions.lg),
+                    _buildGoalOptions(),
+                    const SizedBox(height: AppDimensions.xl2),
+                    // English level
+                    Text("What's your current level?", style: AppTypography.h1),
+                    const SizedBox(height: AppDimensions.xs),
+                    Text(
+                      'Be honest — Maya tailors sessions to your level.',
+                      style: AppTypography.body.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: AppDimensions.lg),
+                    _buildLevelOptions(),
+                    const SizedBox(height: AppDimensions.xl),
+                  ],
+                ),
               ),
-              const SizedBox(height: AppDimensions.xs),
-              Text(
-                'Which language do you prefer with Maya?',
-                style: AppTypography.body.copyWith(color: AppColors.textSecondary),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppDimensions.lg, 0, AppDimensions.lg, AppDimensions.md,
               ),
-              const SizedBox(height: AppDimensions.xl),
-              _buildLanguageOptions(),
-              const Spacer(),
-              BoolooButton.primary(
+              child: BoolooButton.primary(
                 label: _saving ? 'Starting...' : 'Meet Maya →',
                 onPressed: _saving ? null : _complete,
                 isLoading: _saving,
               ),
-              const SizedBox(height: AppDimensions.md),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -86,16 +129,9 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
                 bottomLeft: Radius.circular(4),
               ),
               border: Border.all(color: AppColors.borderSubtle),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.04),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
             ),
-            child: Text(
-              'Hi! I\'m Maya — your personal AI English coach. Before we start, quick question:',
+            child: const Text(
+              "Hi! I'm Maya — your personal AI English coach. A few quick questions to personalise your journey:",
               style: AppTypography.body,
             ),
           ),
@@ -107,7 +143,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
   Widget _buildLanguageOptions() {
     return Column(
       children: [
-        _LanguageCard(
+        _SelectionCard(
           emoji: '🌟',
           label: 'Mixed Mode',
           subtitle: 'বাংলা + English — Best for most learners',
@@ -115,7 +151,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
           onTap: () => setState(() => _language = 'mixed'),
         ),
         const SizedBox(height: AppDimensions.mdMinus),
-        _LanguageCard(
+        _SelectionCard(
           emoji: '🇺🇸',
           label: 'English Only',
           subtitle: 'Full English immersion',
@@ -123,7 +159,7 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
           onTap: () => setState(() => _language = 'english'),
         ),
         const SizedBox(height: AppDimensions.mdMinus),
-        _LanguageCard(
+        _SelectionCard(
           emoji: '🇧🇩',
           label: 'বাংলা',
           subtitle: 'Full Bangla — Maya explains in Bangla',
@@ -133,10 +169,78 @@ class _OnboardingFlowState extends ConsumerState<OnboardingFlow> {
       ],
     );
   }
+
+  Widget _buildGoalOptions() {
+    return Column(
+      children: [
+        _SelectionCard(
+          emoji: '🎯',
+          label: 'Job Interview',
+          subtitle: 'Ace interviews and get hired faster',
+          selected: _goal == 'jobInterview',
+          onTap: () => setState(() => _goal = 'jobInterview'),
+        ),
+        const SizedBox(height: AppDimensions.mdMinus),
+        _SelectionCard(
+          emoji: '💼',
+          label: 'Freelancing',
+          subtitle: 'Win international clients with confidence',
+          selected: _goal == 'freelancing',
+          onTap: () => setState(() => _goal = 'freelancing'),
+        ),
+        const SizedBox(height: AppDimensions.mdMinus),
+        _SelectionCard(
+          emoji: '🏢',
+          label: 'Corporate Growth',
+          subtitle: 'Lead meetings and presentations',
+          selected: _goal == 'corporate',
+          onTap: () => setState(() => _goal = 'corporate'),
+        ),
+        const SizedBox(height: AppDimensions.mdMinus),
+        _SelectionCard(
+          emoji: '📚',
+          label: 'IELTS / Exam',
+          subtitle: 'Score higher in English exams',
+          selected: _goal == 'ielts',
+          onTap: () => setState(() => _goal = 'ielts'),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLevelOptions() {
+    return Column(
+      children: [
+        _SelectionCard(
+          emoji: '🌱',
+          label: 'Beginner',
+          subtitle: 'I struggle with basic English sentences',
+          selected: _level == 'beginner',
+          onTap: () => setState(() => _level = 'beginner'),
+        ),
+        const SizedBox(height: AppDimensions.mdMinus),
+        _SelectionCard(
+          emoji: '⚡',
+          label: 'Intermediate',
+          subtitle: 'I can communicate but lack confidence',
+          selected: _level == 'intermediate',
+          onTap: () => setState(() => _level = 'intermediate'),
+        ),
+        const SizedBox(height: AppDimensions.mdMinus),
+        _SelectionCard(
+          emoji: '🚀',
+          label: 'Upper Intermediate',
+          subtitle: 'I speak well but want to be excellent',
+          selected: _level == 'upperIntermediate',
+          onTap: () => setState(() => _level = 'upperIntermediate'),
+        ),
+      ],
+    );
+  }
 }
 
-class _LanguageCard extends StatelessWidget {
-  const _LanguageCard({
+class _SelectionCard extends StatelessWidget {
+  const _SelectionCard({
     required this.emoji,
     required this.label,
     required this.subtitle,
@@ -164,13 +268,6 @@ class _LanguageCard extends StatelessWidget {
             color: selected ? AppColors.blue : AppColors.borderSubtle,
             width: selected ? 2 : 1,
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
-            ),
-          ],
         ),
         child: Row(
           children: [

@@ -19,6 +19,7 @@ class PaywallScreen extends ConsumerStatefulWidget {
 
 class _PaywallScreenState extends ConsumerState<PaywallScreen> {
   bool _isLoading = false;
+  bool _confirmingPayment = false;
 
   Future<void> _purchaseNow() async {
     final user = ref.read(currentUserProvider);
@@ -42,7 +43,13 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
             builder: (_) => PaymentWebView(
               url: paymentUrl,
               onSuccess: () {
-                context.go('/dashboard');
+                Navigator.of(context).pop();
+                if (!mounted) return;
+                setState(() => _confirmingPayment = true);
+                ref.invalidate(subscriptionProvider);
+                Future.delayed(const Duration(seconds: 10), () {
+                  if (mounted && _confirmingPayment) context.go('/dashboard');
+                });
               },
               onCancel: () => Navigator.of(context).pop(),
             ),
@@ -62,6 +69,12 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(hasSubscriptionProvider, (prev, next) {
+      if (_confirmingPayment && next.value == true && mounted) {
+        context.go('/dashboard');
+      }
+    });
+
     final profile = ref.watch(userProfileNotifierProvider).value;
     final assessmentResult = profile?.assessmentResult;
     final opportunity = assessmentResult?['biggest_opportunity'] as String?;
@@ -127,6 +140,35 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
               ],
             ),
           ),
+          if (_confirmingPayment)
+            Positioned.fill(
+              child: Container(
+                color: Colors.black.withOpacity(0.75),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2.5,
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        'Confirming your payment...',
+                        style: AppTypography.bodyLarge.copyWith(color: Colors.white),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Please wait a moment.',
+                        style: AppTypography.caption.copyWith(
+                          color: Colors.white.withOpacity(0.6),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           // Sticky bottom CTA bar
           Positioned(
             bottom: 0,
