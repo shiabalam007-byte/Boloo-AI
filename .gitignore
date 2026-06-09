@@ -74,3 +74,6 @@ debug_web.js
 screenshot_verify.js
 screenshot_auth_subs.js
 live_verify.js
+
+# Claude Code agent worktrees (ephemeral, not project files)
+.claude/
