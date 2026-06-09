@@ -1,8 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/conversation.dart';
 import '../models/message.dart';
-import '../services/conversation_service.dart';
-import '../services/maya_service.dart';
 import 'auth_provider.dart';
 import 'conversation_provider.dart';
 import 'user_provider.dart';

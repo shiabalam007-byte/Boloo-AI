@@ -1,6 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/curriculum_day.dart';
-import '../core/errors/app_exception.dart';
 
 class JourneyService {
   final _client = Supabase.instance.client;

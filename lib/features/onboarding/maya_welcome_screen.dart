@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../app/theme/colors.dart';
-import '../../app/theme/typography.dart';
 import '../../app/theme/dimensions.dart';
 import '../../providers/user_provider.dart';
 import '../../services/voice_service.dart';
@@ -178,7 +177,10 @@ class _MayaWelcomeScreenState extends ConsumerState<MayaWelcomeScreen>
                   ),
                 ),
               ),
-              const SizedBox(height: 32),
+              SafeArea(
+                top: false,
+                child: const SizedBox(height: AppDimensions.md),
+              ),
             ],
           ),
         ),

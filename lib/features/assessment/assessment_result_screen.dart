@@ -180,18 +180,6 @@ class _AssessmentResultScreenState extends ConsumerState<AssessmentResultScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: AppColors.success.withOpacity(0.12),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Text(
-            '✅ Assessment Complete',
-            style: AppTypography.caption.copyWith(color: AppColors.success),
-          ),
-        ),
-        const SizedBox(height: AppDimensions.md),
         Text(
           'Your Personal\nAnalysis is Ready',
           style: AppTypography.displayL,
@@ -201,24 +189,6 @@ class _AssessmentResultScreenState extends ConsumerState<AssessmentResultScreen>
           'Based on your conversation with Maya, here is exactly where you stand — and what is possible for you.',
           style: AppTypography.body.copyWith(color: AppColors.textSecondary),
         ),
-      ],
-    );
-  }
-
-  Widget _buildScoreRow(int confidence, int communication) {
-    return Row(
-      children: [
-        Expanded(child: _ScoreCard(
-          label: 'Confidence',
-          score: confidence,
-          icon: '💪',
-        )),
-        const SizedBox(width: AppDimensions.md),
-        Expanded(child: _ScoreCard(
-          label: 'Communication',
-          score: communication,
-          icon: '🗣️',
-        )),
       ],
     );
   }
@@ -424,64 +394,6 @@ class _AssessmentResultScreenState extends ConsumerState<AssessmentResultScreen>
         '🔒 Secure payment via Zinnipay · bKash · Nagad · Visa · MasterCard',
         style: AppTypography.micro.copyWith(color: AppColors.textTertiary),
         textAlign: TextAlign.center,
-      ),
-    );
-  }
-}
-
-class _ScoreCard extends StatelessWidget {
-  const _ScoreCard({
-    required this.label,
-    required this.score,
-    required this.icon,
-  });
-
-  final String label;
-  final int score;
-  final String icon;
-
-  Color get _scoreColor {
-    if (score >= 70) return AppColors.success;
-    if (score >= 45) return AppColors.warning;
-    return AppColors.error;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppDimensions.md),
-      decoration: BoxDecoration(
-        color: AppColors.bgSurface,
-        borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-        border: Border.all(color: _scoreColor.withOpacity(0.2)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Text(icon, style: const TextStyle(fontSize: 24)),
-          const SizedBox(height: AppDimensions.xs),
-          Text(
-            '$score',
-            style: TextStyle(
-              fontFamily: 'PlusJakartaSans',
-              fontSize: 40,
-              fontWeight: FontWeight.w700,
-              color: _scoreColor,
-            ),
-          ),
-          Text(
-            '/100',
-            style: AppTypography.caption.copyWith(color: AppColors.textTertiary),
-          ),
-          const SizedBox(height: 4),
-          Text(label, style: AppTypography.caption),
-        ],
       ),
     );
   }

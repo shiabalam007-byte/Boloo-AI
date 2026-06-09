@@ -113,7 +113,10 @@ class _ScorecardScreenState extends ConsumerState<ScorecardScreen>
               const SizedBox(height: AppDimensions.mdMinus),
               BoolooButton.ghost(
                 label: 'Practice Again',
-                onPressed: () => context.go('/session/setup'),
+                onPressed: () => context.go(
+                  '/session/voice',
+                  extra: const <String, dynamic>{},
+                ),
               ),
               const SizedBox(height: AppDimensions.xl),
             ],

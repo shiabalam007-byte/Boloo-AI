@@ -3,7 +3,6 @@ import 'package:uuid/uuid.dart';
 import '../models/conversation.dart';
 import '../models/message.dart';
 import '../core/errors/app_exception.dart';
-import '../core/utils/logger.dart';
 
 class ConversationService {
   final _client = Supabase.instance.client;

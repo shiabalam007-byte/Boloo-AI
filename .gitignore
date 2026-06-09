@@ -81,3 +81,4 @@ live_verify.js
 # Ephemeral visual verification screenshots
 test/current_screens_test.dart
 test/goldens/current_*.png
+test/failures/
