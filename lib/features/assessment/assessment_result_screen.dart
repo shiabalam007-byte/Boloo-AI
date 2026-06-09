@@ -7,13 +7,45 @@ import '../../app/theme/typography.dart';
 import '../../app/theme/dimensions.dart';
 import '../../providers/assessment_provider.dart';
 import '../../providers/user_provider.dart';
-import '../../shared/widgets/maya_avatar.dart';
 
-class AssessmentResultScreen extends ConsumerWidget {
+class AssessmentResultScreen extends ConsumerStatefulWidget {
   const AssessmentResultScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AssessmentResultScreen> createState() =>
+      _AssessmentResultScreenState();
+}
+
+class _AssessmentResultScreenState extends ConsumerState<AssessmentResultScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _scoreController;
+  late Animation<double> _scoreAnim;
+
+  @override
+  void initState() {
+    super.initState();
+    _scoreController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1600),
+    );
+    _scoreAnim = CurvedAnimation(
+      parent: _scoreController,
+      curve: Curves.easeOut,
+    );
+    // Start after a short delay so the screen paints first
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (mounted) _scoreController.forward();
+    });
+  }
+
+  @override
+  void dispose() {
+    _scoreController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(assessmentProvider);
     final profile = ref.watch(userProfileNotifierProvider).value;
     final result = state.result ?? profile?.assessmentResult;
@@ -39,22 +71,13 @@ class AssessmentResultScreen extends ConsumerWidget {
       backgroundColor: AppColors.bgPage,
       body: CustomScrollView(
         slivers: [
-          SliverAppBar(
-            backgroundColor: AppColors.bgPage,
-            automaticallyImplyLeading: false,
-            floating: true,
-            elevation: 0,
-            title: Row(
-              children: [
-                const MayaAvatar(state: MayaState.idle, size: 36),
-                const SizedBox(width: 10),
-                const Text('Maya', style: AppTypography.h3),
-              ],
-            ),
+          // Hero gradient score banner — no app bar, full-bleed
+          SliverToBoxAdapter(
+            child: _buildScoreHero(firstName, confidenceScore, communicationScore),
           ),
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(
-              AppDimensions.lg, 0, AppDimensions.lg, AppDimensions.xl3,
+              AppDimensions.lg, AppDimensions.lg, AppDimensions.lg, AppDimensions.xl3,
             ),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
@@ -77,6 +100,80 @@ class AssessmentResultScreen extends ConsumerWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildScoreHero(String firstName, int confidence, int communication) {
+    return Container(
+      width: double.infinity,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [AppColors.bg900, Color(0xFF1A0A2E)],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+      ),
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppDimensions.lg, AppDimensions.lg, AppDimensions.lg, AppDimensions.xl,
+          ),
+          child: Column(
+            children: [
+              // Chip
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                decoration: BoxDecoration(
+                  color: AppColors.success.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  '✅  Assessment Complete',
+                  style: AppTypography.caption.copyWith(color: AppColors.success),
+                ),
+              ),
+              const SizedBox(height: AppDimensions.lg),
+              // Animated score row
+              AnimatedBuilder(
+                animation: _scoreAnim,
+                builder: (_, __) {
+                  final cVal = (confidence * _scoreAnim.value).toInt();
+                  final mVal = (communication * _scoreAnim.value).toInt();
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _HeroScore(
+                        value: cVal,
+                        label: 'Confidence',
+                        color: AppColors.scoreColor(cVal.toDouble()),
+                      ),
+                      Container(
+                        width: 1,
+                        height: 48,
+                        color: Colors.white.withOpacity(0.15),
+                      ),
+                      _HeroScore(
+                        value: mVal,
+                        label: 'Communication',
+                        color: AppColors.scoreColor(mVal.toDouble()),
+                      ),
+                    ],
+                  );
+                },
+              ),
+              const SizedBox(height: AppDimensions.lg),
+              Text(
+                'Your personalized 90-day plan is ready',
+                style: AppTypography.body.copyWith(
+                  color: Colors.white.withOpacity(0.7),
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -463,6 +560,40 @@ class _BulletItem extends StatelessWidget {
           Expanded(child: Text(text, style: AppTypography.body)),
         ],
       ),
+    );
+  }
+}
+
+class _HeroScore extends StatelessWidget {
+  const _HeroScore({required this.value, required this.label, required this.color});
+  final int value;
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          '$value',
+          style: TextStyle(
+            fontFamily: 'DMMonoMedium',
+            fontSize: 52,
+            fontWeight: FontWeight.w700,
+            color: color,
+            height: 1.0,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: const TextStyle(
+            color: Colors.white60,
+            fontSize: 12,
+            fontFamily: 'PlusJakartaSans',
+          ),
+        ),
+      ],
     );
   }
 }

@@ -392,29 +392,121 @@ class _EmptyProgressCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppDimensions.xl),
-      decoration: BoxDecoration(
-        color: AppColors.bgSurface,
-        borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-        border: Border.all(color: AppColors.borderSubtle),
-      ),
-      child: Column(
-        children: [
-          const Icon(Icons.bar_chart_rounded,
-              color: AppColors.textTertiary, size: 48),
-          const SizedBox(height: AppDimensions.md),
-          Text('No data yet', style: AppTypography.h3.copyWith(
-            color: AppColors.textSecondary,
-          )),
-          const SizedBox(height: AppDimensions.sm),
-          const Text(
-            'Complete your first session to see\nyour progress charts',
-            style: AppTypography.body,
-            textAlign: TextAlign.center,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(AppDimensions.lg),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                AppColors.blue.withOpacity(0.06),
+                AppColors.brandPurple.withOpacity(0.06),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
+            border: Border.all(color: AppColors.blue.withOpacity(0.15)),
           ),
-        ],
-      ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: AppColors.blue.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      '📈 Your Progress Chart',
+                      style: AppTypography.caption.copyWith(color: AppColors.blue),
+                    ),
+                  ),
+                  const Spacer(),
+                  Text(
+                    'Unlocks after Session 1',
+                    style: AppTypography.micro.copyWith(color: AppColors.textTertiary),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppDimensions.lg),
+              // Decorative preview bars
+              _PreviewScoreBar(label: 'Confidence', colorSeed: AppColors.brandPurple),
+              const SizedBox(height: AppDimensions.sm),
+              _PreviewScoreBar(label: 'Fluency', colorSeed: AppColors.blue),
+              const SizedBox(height: AppDimensions.sm),
+              _PreviewScoreBar(label: 'Communication', colorSeed: AppColors.success),
+              const SizedBox(height: AppDimensions.lg),
+              Row(
+                children: [
+                  const Icon(Icons.lock_outline_rounded,
+                      color: AppColors.textTertiary, size: 14),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Complete your first session to unlock real scores',
+                    style: AppTypography.caption.copyWith(color: AppColors.textTertiary),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _PreviewScoreBar extends StatelessWidget {
+  const _PreviewScoreBar({required this.label, required this.colorSeed});
+  final String label;
+  final Color colorSeed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        SizedBox(
+          width: 100,
+          child: Text(label, style: AppTypography.body),
+        ),
+        Expanded(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: Container(
+              height: 8,
+              decoration: BoxDecoration(
+                color: AppColors.bgSurface2,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: FractionallySizedBox(
+                alignment: Alignment.centerLeft,
+                widthFactor: 0,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: colorSeed,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: AppDimensions.sm),
+        SizedBox(
+          width: 36,
+          child: Text(
+            '--',
+            style: AppTypography.caption.copyWith(
+              color: AppColors.textTertiary,
+              fontFamily: 'DMMonoMedium',
+            ),
+            textAlign: TextAlign.end,
+          ),
+        ),
+      ],
     );
   }
 }

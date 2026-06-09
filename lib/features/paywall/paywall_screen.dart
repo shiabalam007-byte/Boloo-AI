@@ -8,7 +8,6 @@ import '../../app/theme/dimensions.dart';
 import '../../providers/subscription_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/user_provider.dart';
-import '../../shared/widgets/boloo_button.dart';
 import '../../shared/widgets/maya_avatar.dart';
 
 class PaywallScreen extends ConsumerStatefulWidget {
@@ -80,36 +79,132 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
           },
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppDimensions.lg),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildMayaSection(opportunity, recommendation),
-            const SizedBox(height: AppDimensions.lg),
-            _buildHeader(),
-            const SizedBox(height: AppDimensions.xl),
-            _buildFeatures(),
-            const SizedBox(height: AppDimensions.xl),
-            _buildPriceCard(),
-            const SizedBox(height: AppDimensions.xl),
-            _buildPaymentMethods(),
-            const SizedBox(height: AppDimensions.xl),
-            BoolooButton.primary(
-              label: 'Start My Journey — ৳1,999',
-              onPressed: _isLoading ? null : _purchaseNow,
-              isLoading: _isLoading,
+      body: Stack(
+        children: [
+          // Scrollable content — padded at bottom so it clears the sticky bar
+          SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(
+              AppDimensions.lg, AppDimensions.lg, AppDimensions.lg, 0,
             ),
-            const SizedBox(height: AppDimensions.md),
-            Center(
-              child: Text(
-                '🔒 Secure payment via Zinnipay',
-                style: AppTypography.caption,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildMayaSection(opportunity, recommendation),
+                const SizedBox(height: AppDimensions.sm),
+                _buildSocialProof(),
+                const SizedBox(height: AppDimensions.lg),
+                _buildHeader(),
+                const SizedBox(height: AppDimensions.lg),
+                _buildTransformationStory(),
+                const SizedBox(height: AppDimensions.xl),
+                _buildFeatures(),
+                const SizedBox(height: AppDimensions.xl),
+                _buildPriceCard(),
+                const SizedBox(height: AppDimensions.xl),
+                _buildPaymentMethods(),
+                const SizedBox(height: AppDimensions.xl),
+                // Ghost CTA — points user upward to sticky bar
+                Center(
+                  child: TextButton(
+                    onPressed: _isLoading ? null : _purchaseNow,
+                    child: Text(
+                      'or pay at the bottom ↑',
+                      style: AppTypography.caption.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: AppDimensions.md),
+                Center(
+                  child: Text(
+                    '🔒 Secure payment via Zinnipay',
+                    style: AppTypography.caption,
+                  ),
+                ),
+                // Extra bottom padding so content scrolls above the sticky bar
+                const SizedBox(height: 100),
+              ],
+            ),
+          ),
+          // Sticky bottom CTA bar
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: SafeArea(
+              top: false,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: AppColors.bgPage,
+                  border: const Border(
+                    top: BorderSide(color: AppColors.borderSubtle),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.08),
+                      blurRadius: 12,
+                      offset: const Offset(0, -4),
+                    ),
+                  ],
+                ),
+                padding: const EdgeInsets.fromLTRB(24, 12, 24, 16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [AppColors.blue, AppColors.brandPurple],
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                          ),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: ElevatedButton(
+                          onPressed: _isLoading ? null : _purchaseNow,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            shadowColor: Colors.transparent,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                          child: _isLoading
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : Text(
+                                  'Start My Journey →',
+                                  style: AppTypography.h3.copyWith(
+                                    color: Colors.white,
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '৳22/day',
+                      style: AppTypography.caption.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(height: AppDimensions.xl),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -146,6 +241,51 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     );
   }
 
+  Widget _buildSocialProof() {
+    return Container(
+      margin: const EdgeInsets.only(top: 16, bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppColors.success.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.success.withOpacity(0.2)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Text(
+            '★★★★★',
+            style: AppTypography.caption.copyWith(color: AppColors.success),
+          ),
+          Text(
+            '4.9 Rating',
+            style: AppTypography.micro.copyWith(color: AppColors.success),
+          ),
+          Text(
+            '|',
+            style: AppTypography.caption.copyWith(
+              color: AppColors.success.withOpacity(0.4),
+            ),
+          ),
+          Text(
+            '1,247 enrolled',
+            style: AppTypography.micro.copyWith(color: AppColors.success),
+          ),
+          Text(
+            '|',
+            style: AppTypography.caption.copyWith(
+              color: AppColors.success.withOpacity(0.4),
+            ),
+          ),
+          Text(
+            'Bangladesh #1',
+            style: AppTypography.micro.copyWith(color: AppColors.success),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildHeader() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -167,6 +307,96 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
         Text(
           'Join 1,200+ confident Bangladeshi professionals who transformed their English communication.',
           style: AppTypography.body,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTransformationStory() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('What changes for you:', style: AppTypography.h3),
+        const SizedBox(height: AppDimensions.md),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Before card
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(AppDimensions.md),
+                decoration: BoxDecoration(
+                  color: AppColors.bgSurface2,
+                  borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
+                  border: Border.all(color: AppColors.borderSubtle),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '😔 Before BOLOO',
+                      style: AppTypography.caption.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: AppDimensions.sm),
+                    ...[
+                      'Fear of speaking English',
+                      'Missed career chances',
+                      'Low confidence at work',
+                    ].map((item) => Padding(
+                      padding: const EdgeInsets.only(bottom: 4),
+                      child: Text(
+                        '• $item',
+                        style: AppTypography.micro.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    )),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(width: AppDimensions.sm),
+            // After card
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.all(AppDimensions.md),
+                decoration: BoxDecoration(
+                  color: AppColors.success.withOpacity(0.06),
+                  borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
+                  border: Border.all(
+                    color: AppColors.success.withOpacity(0.2),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '✅ After BOLOO',
+                      style: AppTypography.caption.copyWith(
+                        color: AppColors.success,
+                      ),
+                    ),
+                    const SizedBox(height: AppDimensions.sm),
+                    ...[
+                      'Speak English confidently',
+                      'Land better opportunities',
+                      'Lead meetings with ease',
+                    ].map((item) => Padding(
+                      padding: const EdgeInsets.only(bottom: 4),
+                      child: Text(
+                        '• $item',
+                        style: AppTypography.micro.copyWith(
+                          color: AppColors.success,
+                        ),
+                      ),
+                    )),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ],
     );

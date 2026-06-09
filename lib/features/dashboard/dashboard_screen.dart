@@ -98,27 +98,11 @@ class DashboardScreen extends ConsumerWidget {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push(
-          '/session/voice',
-          extra: <String, dynamic>{},
-        ),
-        backgroundColor: AppColors.blue,
-        elevation: 4,
-        icon: const Icon(Icons.mic_rounded, color: Colors.white),
-        label: const Text(
-          'Practice Now',
-          style: TextStyle(
-            fontFamily: 'PlusJakartaSans',
-            color: Colors.white,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
     );
   }
 
   SliverAppBar _buildAppBar(int day, int streak) {
+    final percent = (day / 90 * 100).toInt();
     return SliverAppBar(
       floating: true,
       backgroundColor: AppColors.bgPage,
@@ -165,6 +149,30 @@ class DashboardScreen extends ConsumerWidget {
           ],
         ],
       ),
+      bottom: day > 1
+          ? PreferredSize(
+              preferredSize: const Size.fromHeight(28),
+              child: Container(
+                height: 28,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      AppColors.blue.withOpacity(0.08),
+                      AppColors.brandPurple.withOpacity(0.08),
+                    ],
+                  ),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  'Day $day of 90 — You\'re $percent% there!',
+                  style: AppTypography.caption.copyWith(
+                    color: AppColors.blue,
+                    fontSize: 11,
+                  ),
+                ),
+              ),
+            )
+          : null,
     );
   }
 }
@@ -185,6 +193,13 @@ class _MayaHeroCard extends StatelessWidget {
     if (hour < 12) return 'Good morning';
     if (hour < 17) return 'Good afternoon';
     return 'Good evening';
+  }
+
+  String get _dayMessage {
+    if (day == 1) return 'Your journey starts today. Let\'s go! 🚀';
+    if (day <= 7) return 'You\'re building momentum. Day $day! 💪';
+    if (day <= 30) return 'Keep going — Day $day of 90! 🔥';
+    return 'Day $day — you\'re in the zone! ⭐';
   }
 
   @override
@@ -222,7 +237,7 @@ class _MayaHeroCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    "Ready for Day $day? Let's practice!",
+                    _dayMessage,
                     style: AppTypography.caption.copyWith(
                       color: Colors.white.withOpacity(0.85),
                     ),
@@ -294,6 +309,13 @@ class _ScoreChip extends StatelessWidget {
   final String label;
   final double value;
 
+  String get _semanticLabel {
+    if (value >= 80) return 'Excellent';
+    if (value >= 60) return 'Good';
+    if (value >= 40) return 'Developing';
+    return 'Beginner';
+  }
+
   @override
   Widget build(BuildContext context) {
     final color = AppColors.scoreColor(value);
@@ -319,6 +341,17 @@ class _ScoreChip extends StatelessWidget {
               style: AppTypography.scoreNumber.copyWith(color: color),
             ),
             Text(label, style: AppTypography.micro, textAlign: TextAlign.center),
+            const SizedBox(height: 2),
+            Text(
+              _semanticLabel,
+              style: TextStyle(
+                fontSize: 9,
+                color: color.withOpacity(0.8),
+                fontWeight: FontWeight.w600,
+                fontFamily: 'PlusJakartaSans',
+              ),
+              textAlign: TextAlign.center,
+            ),
           ],
         ),
       ),

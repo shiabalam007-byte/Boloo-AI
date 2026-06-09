@@ -139,8 +139,9 @@ class _VoiceSessionScreenState extends ConsumerState<VoiceSessionScreen>
                 : MayaState.idle;
 
     return Scaffold(
-      backgroundColor: AppColors.bgPage,
+      backgroundColor: AppColors.bg900,
       body: SafeArea(
+        bottom: false,
         child: Column(
           children: [
             _buildTopBar(state.conversation?.topic ?? 'Voice Session'),
@@ -153,6 +154,12 @@ class _VoiceSessionScreenState extends ConsumerState<VoiceSessionScreen>
                 lastMessage: lastMayaMessage,
                 sessionStarted: _sessionStarted,
               ),
+            ),
+            // Subtle divider between maya and user sections
+            Container(
+              height: 1,
+              margin: const EdgeInsets.symmetric(horizontal: AppDimensions.lg),
+              color: const Color(0xFF1A1A1F),
             ),
             Expanded(
               flex: 4,
@@ -179,17 +186,24 @@ class _VoiceSessionScreenState extends ConsumerState<VoiceSessionScreen>
               children: [
                 Text(
                   'Voice Session',
-                  style: AppTypography.caption.copyWith(color: AppColors.textTertiary),
+                  style: AppTypography.caption.copyWith(
+                    color: Colors.white.withOpacity(0.4),
+                  ),
                 ),
-                Text(topic, style: AppTypography.h3),
+                Text(
+                  topic,
+                  style: AppTypography.h3.copyWith(color: Colors.white),
+                ),
               ],
             ),
           ),
           TextButton(
             onPressed: _sessionEnding ? null : _endSession,
             child: Text(
-              'End',
-              style: AppTypography.body.copyWith(color: AppColors.error),
+              'End Session',
+              style: AppTypography.body.copyWith(
+                color: Colors.white.withOpacity(0.6),
+              ),
             ),
           ),
         ],
@@ -207,7 +221,7 @@ class _VoiceSessionScreenState extends ConsumerState<VoiceSessionScreen>
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        MayaAvatar(state: mayaAvatarState, size: 100),
+        MayaAvatar(state: mayaAvatarState, size: 140),
         const SizedBox(height: AppDimensions.lg),
         if (!sessionStarted)
           _buildSpeechBubble('Starting session...')
@@ -226,18 +240,17 @@ class _VoiceSessionScreenState extends ConsumerState<VoiceSessionScreen>
       margin: const EdgeInsets.symmetric(horizontal: AppDimensions.lg),
       padding: const EdgeInsets.all(AppDimensions.md),
       decoration: BoxDecoration(
-        color: AppColors.bgSurface,
+        color: const Color(0xFF1A1A1F),
         borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-        border: Border.all(color: AppColors.borderSubtle),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: Border.all(color: const Color(0xFF2D2D35)),
       ),
-      child: Text(text, style: AppTypography.bodyLarge, textAlign: TextAlign.center),
+      child: Text(
+        text,
+        style: AppTypography.bodyLarge.copyWith(
+          color: Colors.white.withOpacity(0.9),
+        ),
+        textAlign: TextAlign.center,
+      ),
     );
   }
 
@@ -248,14 +261,19 @@ class _VoiceSessionScreenState extends ConsumerState<VoiceSessionScreen>
         horizontal: AppDimensions.md, vertical: AppDimensions.mdMinus,
       ),
       decoration: BoxDecoration(
-        color: AppColors.bgSurface,
+        color: const Color(0xFF1A1A1F),
         borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-        border: Border.all(color: AppColors.borderSubtle),
+        border: Border.all(color: const Color(0xFF2D2D35)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text('Maya is thinking', style: AppTypography.body),
+          Text(
+            'Maya is thinking',
+            style: AppTypography.body.copyWith(
+              color: Colors.white.withOpacity(0.9),
+            ),
+          ),
           const SizedBox(width: 8),
           const _TypingDots(),
         ],
@@ -276,45 +294,67 @@ class _VoiceSessionScreenState extends ConsumerState<VoiceSessionScreen>
               horizontal: AppDimensions.md, vertical: AppDimensions.mdMinus,
             ),
             decoration: BoxDecoration(
-              color: AppColors.blueLight,
+              color: const Color(0xFF1A1A1F),
               borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
-              border: Border.all(color: AppColors.blue.withOpacity(0.2)),
+              border: Border(
+                left: BorderSide(color: AppColors.blue, width: 4),
+              ),
             ),
             child: Text(
               _liveTranscript,
-              style: AppTypography.body.copyWith(color: AppColors.blue),
+              style: AppTypography.body.copyWith(color: Colors.white),
               textAlign: TextAlign.center,
             ),
           ),
           const SizedBox(height: AppDimensions.lg),
         ],
-        GestureDetector(
-          onTap: isDisabled ? null : _onMicTap,
-          child: Container(
-            width: AppDimensions.voiceButtonSize * 1.3,
-            height: AppDimensions.voiceButtonSize * 1.3,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: isListening
-                  ? AppColors.error
-                  : isDisabled
-                      ? AppColors.bgSurface2
-                      : AppColors.blue,
-              boxShadow: isDisabled
-                  ? []
-                  : [
-                      BoxShadow(
-                        color: (isListening ? AppColors.error : AppColors.blue)
-                            .withOpacity(0.35),
-                        blurRadius: 24,
-                        spreadRadius: isListening ? 6 : 2,
-                      ),
-                    ],
-            ),
-            child: Icon(
-              isListening ? Icons.stop_rounded : Icons.mic_rounded,
-              color: isDisabled ? AppColors.textTertiary : Colors.white,
-              size: 38,
+        // Ambient glow container wrapping the mic button
+        Container(
+          width: 96,
+          height: 96,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            boxShadow: isDisabled
+                ? []
+                : [
+                    BoxShadow(
+                      color: (isListening ? AppColors.error : AppColors.blue)
+                          .withOpacity(0.15),
+                      blurRadius: 32,
+                      spreadRadius: 16,
+                    ),
+                  ],
+          ),
+          child: Center(
+            child: GestureDetector(
+              onTap: isDisabled ? null : _onMicTap,
+              child: Container(
+                width: AppDimensions.voiceButtonSize * 1.3,
+                height: AppDimensions.voiceButtonSize * 1.3,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isListening
+                      ? AppColors.error
+                      : isDisabled
+                          ? AppColors.bg600
+                          : AppColors.blue,
+                  boxShadow: isDisabled
+                      ? []
+                      : [
+                          BoxShadow(
+                            color: (isListening ? AppColors.error : AppColors.blue)
+                                .withOpacity(0.35),
+                            blurRadius: 24,
+                            spreadRadius: isListening ? 6 : 2,
+                          ),
+                        ],
+                ),
+                child: Icon(
+                  isListening ? Icons.stop_rounded : Icons.mic_rounded,
+                  color: isDisabled ? AppColors.textTertiary : Colors.white,
+                  size: 38,
+                ),
+              ),
             ),
           ),
         ),
@@ -322,7 +362,9 @@ class _VoiceSessionScreenState extends ConsumerState<VoiceSessionScreen>
         Text(
           _voiceLabel(isListening, isProcessing, isMayaTyping),
           style: AppTypography.caption.copyWith(
-            color: isListening ? AppColors.error : AppColors.textTertiary,
+            color: isListening
+                ? AppColors.error
+                : Colors.white.withOpacity(0.5),
           ),
         ),
       ],

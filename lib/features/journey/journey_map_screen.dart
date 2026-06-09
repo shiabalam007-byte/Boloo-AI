@@ -92,15 +92,37 @@ class JourneyMapScreen extends ConsumerWidget {
       grouped.putIfAbsent(day.phase, () => []).add(day);
     }
 
-    final sections = grouped.entries.toList();
+    final allSections = grouped.entries.toList();
+
+    // Find which phase index is currently active
+    int activePhaseIndex = 0;
+    for (int i = 0; i < allSections.length; i++) {
+      final phaseDays = allSections[i].value;
+      final hasActiveDay = phaseDays.any((d) {
+        final s = progress[d.dayNumber] ?? DayStatus.locked;
+        return s == DayStatus.unlocked || d.dayNumber == currentDay;
+      });
+      final hasCompletedDay = phaseDays.any((d) =>
+          (progress[d.dayNumber] ?? DayStatus.locked) == DayStatus.completed);
+      if (hasActiveDay || hasCompletedDay) activePhaseIndex = i;
+    }
+
+    // Show current phase + next phase only — future phases as locked gate cards
+    final visibleSections = allSections.take(activePhaseIndex + 2).toList();
+    final lockedPhaseCount = allSections.length - visibleSections.length;
+
+    final itemCount = visibleSections.length + (lockedPhaseCount > 0 ? 1 : 0) + 1;
 
     return SliverList(
       delegate: SliverChildBuilderDelegate(
         (context, index) {
-          if (index == sections.length) {
+          if (index == itemCount - 1) {
             return const SizedBox(height: AppDimensions.xl3);
           }
-          final section = sections[index];
+          if (index == visibleSections.length && lockedPhaseCount > 0) {
+            return _LockedPhasesGate(count: lockedPhaseCount);
+          }
+          final section = visibleSections[index];
           final phase = section.key;
           final phaseDays = section.value;
           return _PhaseSection(
@@ -120,7 +142,61 @@ class JourneyMapScreen extends ConsumerWidget {
             },
           );
         },
-        childCount: sections.length + 1,
+        childCount: itemCount,
+      ),
+    );
+  }
+}
+
+class _LockedPhasesGate extends StatelessWidget {
+  const _LockedPhasesGate({required this.count});
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppDimensions.lg, AppDimensions.lg, AppDimensions.lg, 0,
+      ),
+      child: Container(
+        padding: const EdgeInsets.all(AppDimensions.lg),
+        decoration: BoxDecoration(
+          color: AppColors.bgSurface,
+          borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
+          border: Border.all(color: AppColors.borderSubtle),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: AppColors.bgSurface2,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Center(
+                child: Icon(Icons.lock_outline_rounded,
+                    color: AppColors.textTertiary, size: 20),
+              ),
+            ),
+            const SizedBox(width: AppDimensions.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '$count more phases await you',
+                    style: AppTypography.h3.copyWith(color: AppColors.textSecondary),
+                  ),
+                  Text(
+                    'Keep practicing to unlock the next phase',
+                    style: AppTypography.caption,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

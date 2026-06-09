@@ -7,7 +7,6 @@ import '../../app/theme/dimensions.dart';
 import '../../providers/user_provider.dart';
 import '../../services/voice_service.dart';
 import '../../shared/widgets/maya_avatar.dart';
-import '../../shared/widgets/boloo_button.dart';
 
 class MayaWelcomeScreen extends ConsumerStatefulWidget {
   const MayaWelcomeScreen({super.key});
@@ -77,42 +76,92 @@ class _MayaWelcomeScreenState extends ConsumerState<MayaWelcomeScreen>
     final name = profile.value?.fullName?.split(' ').first ?? '';
 
     return Scaffold(
-      backgroundColor: AppColors.bgPage,
-      body: SafeArea(
+      backgroundColor: AppColors.bg900,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF0D0D14), Color(0xFF0F0A1E)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
         child: Padding(
-          padding: const EdgeInsets.all(AppDimensions.lg),
+          padding: const EdgeInsets.symmetric(horizontal: AppDimensions.lg),
           child: Column(
             children: [
-              const Spacer(),
-              MayaAvatar(state: _avatarState, size: 110),
-              const SizedBox(height: AppDimensions.xl),
+              const Spacer(flex: 2),
+              MayaAvatar(state: _avatarState, size: 160),
+              const SizedBox(height: AppDimensions.lg),
               FadeTransition(
                 opacity: _fadeAnim,
-                child: Text(
-                  _messages[_messageIndex],
-                  style: AppTypography.h1,
-                  textAlign: TextAlign.center,
+                child: Column(
+                  children: [
+                    Text(
+                      _messages[_messageIndex],
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontFamily: 'PlusJakartaSans',
+                        fontWeight: FontWeight.w600,
+                        height: 1.4,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    if (name.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        'Hello, $name',
+                        style: const TextStyle(
+                          color: AppColors.lightPurple,
+                          fontSize: 15,
+                          fontFamily: 'PlusJakartaSans',
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ],
                 ),
               ),
-              const SizedBox(height: AppDimensions.md),
-              if (name.isNotEmpty)
-                Text(
-                  name,
-                  style: AppTypography.body.copyWith(color: AppColors.textSecondary),
-                  textAlign: TextAlign.center,
-                ),
-              const Spacer(),
+              const Spacer(flex: 3),
               AnimatedOpacity(
                 opacity: _introComplete ? 1.0 : 0.0,
                 duration: const Duration(milliseconds: 600),
-                child: BoolooButton.primary(
-                  label: "Let's Begin →",
-                  onPressed: _introComplete
-                      ? () => context.go('/assessment')
-                      : null,
+                child: GestureDetector(
+                  onTap: _introComplete ? () => context.go('/assessment') : null,
+                  child: Container(
+                    width: double.infinity,
+                    height: 54,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      gradient: const LinearGradient(
+                        colors: [AppColors.blue, AppColors.brandPurple],
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.blue.withOpacity(0.4),
+                          blurRadius: 20,
+                          spreadRadius: 0,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
+                    ),
+                    child: const Center(
+                      child: Text(
+                        "Let's Begin →",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'PlusJakartaSans',
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
               ),
-              const SizedBox(height: AppDimensions.md),
+              const SizedBox(height: AppDimensions.sm),
               AnimatedOpacity(
                 opacity: _introComplete ? 1.0 : 0.0,
                 duration: const Duration(milliseconds: 600),
@@ -120,15 +169,16 @@ class _MayaWelcomeScreenState extends ConsumerState<MayaWelcomeScreen>
                   onPressed: _introComplete
                       ? () => context.go('/assessment')
                       : null,
-                  child: Text(
+                  child: const Text(
                     'Skip intro',
-                    style: AppTypography.caption.copyWith(
-                      color: AppColors.textTertiary,
+                    style: TextStyle(
+                      color: Color(0xFF475569),
+                      fontSize: 14,
                     ),
                   ),
                 ),
               ),
-              const SizedBox(height: AppDimensions.md),
+              const SizedBox(height: 32),
             ],
           ),
         ),
