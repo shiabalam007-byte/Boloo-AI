@@ -9,10 +9,13 @@ class MayaAvatar extends StatefulWidget {
     super.key,
     this.state = MayaState.idle,
     this.size = 80,
+    this.showLabel = false,
   });
 
   final MayaState state;
   final double size;
+  // When true, renders "MAYA" + "Your Career English Coach" below the orb
+  final bool showLabel;
 
   @override
   State<MayaAvatar> createState() => _MayaAvatarState();
@@ -77,7 +80,7 @@ class _MayaAvatarState extends State<MayaAvatar>
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    final orb = SizedBox(
       width: widget.size * 1.5,
       height: widget.size * 1.5,
       child: Stack(
@@ -87,6 +90,36 @@ class _MayaAvatarState extends State<MayaAvatar>
           _buildCore(),
         ],
       ),
+    );
+
+    if (!widget.showLabel) return orb;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        orb,
+        const SizedBox(height: 10),
+        Text(
+          'MAYA',
+          style: TextStyle(
+            fontFamily: 'PlusJakartaSans',
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 3.0,
+            color: Colors.white.withOpacity(0.9),
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          'Your Career English Coach',
+          style: TextStyle(
+            fontFamily: 'PlusJakartaSans',
+            fontSize: 11,
+            fontWeight: FontWeight.w400,
+            color: Colors.white.withOpacity(0.45),
+          ),
+        ),
+      ],
     );
   }
 

@@ -46,7 +46,6 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
     super.dispose();
   }
 
-  // Auto-speak when Maya has a new message
   void _onAssessmentStateChanged(AssessmentState? prev, AssessmentState next) {
     if (next.status == AssessmentStatus.complete && next.result != null) {
       context.go('/assessment-result');
@@ -67,7 +66,6 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
 
   Future<void> _speakAndListen(String text) async {
     await _voiceService.speak(text);
-    // VoiceService fires idle state when TTS completes; auto-open mic after brief pause
     await Future.delayed(const Duration(milliseconds: 400));
     if (!mounted) return;
     final state = ref.read(assessmentProvider);
@@ -112,12 +110,14 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
     ref.listen(assessmentProvider, _onAssessmentStateChanged);
 
     return Scaffold(
-      backgroundColor: AppColors.bgPage,
+      backgroundColor: AppColors.bg900,
       body: SafeArea(
+        bottom: false,
         child: Column(
           children: [
             _buildTopBar(state),
             Expanded(child: _buildBody(state)),
+            const SizedBox(height: AppDimensions.lg),
           ],
         ),
       ),
@@ -126,13 +126,20 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
 
   Widget _buildTopBar(AssessmentState state) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppDimensions.lg,
-        vertical: AppDimensions.md,
+      padding: const EdgeInsets.fromLTRB(
+        AppDimensions.md, AppDimensions.md, AppDimensions.lg, 0,
       ),
       child: Row(
         children: [
-          const Text('Assessment', style: AppTypography.h3),
+          TextButton(
+            onPressed: () => context.canPop() ? context.pop() : context.go('/auth'),
+            child: Text(
+              'Cancel',
+              style: AppTypography.body.copyWith(
+                color: Colors.white.withOpacity(0.45),
+              ),
+            ),
+          ),
           const Spacer(),
           if (state.status != AssessmentStatus.scoring &&
               state.status != AssessmentStatus.complete)
@@ -145,7 +152,9 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
             onTap: () => setState(() => _showFallbackInput = !_showFallbackInput),
             child: Icon(
               Icons.keyboard_rounded,
-              color: _showFallbackInput ? AppColors.blue : AppColors.textTertiary,
+              color: _showFallbackInput
+                  ? AppColors.blue
+                  : Colors.white.withOpacity(0.4),
               size: 20,
             ),
           ),
@@ -168,6 +177,12 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
         Expanded(
           flex: 5,
           child: _buildMayaSection(state),
+        ),
+        // Subtle dark divider
+        Container(
+          height: 1,
+          margin: const EdgeInsets.symmetric(horizontal: AppDimensions.lg),
+          color: const Color(0xFF1A1A1F),
         ),
         Expanded(
           flex: 4,
@@ -194,18 +209,20 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        MayaAvatar(state: mayaAvatarState, size: 100),
+        MayaAvatar(state: mayaAvatarState, size: 130, showLabel: true),
         const SizedBox(height: AppDimensions.lg),
         if (isThinking)
-          _MayaThinkingBubble()
+          _DarkThinkingBubble()
         else if (lastMayaMessage != null)
-          _MayaSpeechBubble(text: lastMayaMessage)
+          _DarkSpeechBubble(text: lastMayaMessage)
         else
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppDimensions.xl),
             child: Text(
               'Maya is getting ready for you...',
-              style: AppTypography.body,
+              style: AppTypography.body.copyWith(
+                color: Colors.white.withOpacity(0.5),
+              ),
               textAlign: TextAlign.center,
             ),
           ),
@@ -222,24 +239,46 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         if (_liveTranscript.isNotEmpty) ...[
-          _LiveTranscriptBubble(text: _liveTranscript),
+          _DarkTranscriptBubble(text: _liveTranscript),
           const SizedBox(height: AppDimensions.md),
         ],
         if (!_showFallbackInput) ...[
-          _MicButton(
-            isListening: isListening,
-            isDisabled: isDisabled,
-            onTap: isDisabled ? null : _onMicTap,
+          // Ambient glow container — mirrors Voice Session
+          Container(
+            width: 96,
+            height: 96,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              boxShadow: isDisabled
+                  ? []
+                  : [
+                      BoxShadow(
+                        color: (isListening ? AppColors.error : AppColors.blue)
+                            .withOpacity(0.15),
+                        blurRadius: 32,
+                        spreadRadius: 16,
+                      ),
+                    ],
+            ),
+            child: Center(
+              child: _DarkMicButton(
+                isListening: isListening,
+                isDisabled: isDisabled,
+                onTap: isDisabled ? null : _onMicTap,
+              ),
+            ),
           ),
           const SizedBox(height: AppDimensions.md),
           Text(
             _statusLabel(state, isListening),
             style: AppTypography.caption.copyWith(
-              color: isListening ? AppColors.error : AppColors.textTertiary,
+              color: isListening
+                  ? AppColors.error
+                  : Colors.white.withOpacity(0.45),
             ),
           ),
         ] else ...[
-          _FallbackInput(
+          _DarkFallbackInput(
             controller: _textController,
             enabled: isActive,
             onSubmit: _submitTextAnswer,
@@ -253,13 +292,18 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const MayaAvatar(state: MayaState.thinking, size: 100),
+        const MayaAvatar(state: MayaState.thinking, size: 120, showLabel: true),
         const SizedBox(height: AppDimensions.xl),
-        const Text('Building your personalized plan...', style: AppTypography.h2),
+        Text(
+          'Building your personalized plan...',
+          style: AppTypography.h2.copyWith(color: Colors.white),
+          textAlign: TextAlign.center,
+        ),
         const SizedBox(height: AppDimensions.sm),
         Text(
           'Maya is analyzing your responses.',
-          style: AppTypography.body.copyWith(color: AppColors.textSecondary),
+          style: AppTypography.body.copyWith(color: Colors.white.withOpacity(0.5)),
+          textAlign: TextAlign.center,
         ),
         const SizedBox(height: AppDimensions.xl),
         const SizedBox(
@@ -280,38 +324,52 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const MayaAvatar(state: MayaState.idle, size: 80),
+          const MayaAvatar(state: MayaState.idle, size: 100, showLabel: true),
           const SizedBox(height: AppDimensions.xl),
-          const Text('Could not reach Maya', style: AppTypography.h2),
+          Text(
+            'Could not reach Maya',
+            style: AppTypography.h2.copyWith(color: Colors.white),
+          ),
           const SizedBox(height: AppDimensions.sm),
           Text(
             state.error?.replaceFirst('ConversationException: ', '') ??
                 'Please check your internet connection.',
-            style: AppTypography.body.copyWith(color: AppColors.textSecondary),
+            style: AppTypography.body.copyWith(
+              color: Colors.white.withOpacity(0.55),
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppDimensions.xl),
           SizedBox(
             width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {
-                ref.read(assessmentProvider.notifier).reset();
-                Future.microtask(
-                    () => ref.read(assessmentProvider.notifier).startAssessment());
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.blue,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
+            height: AppDimensions.buttonHeight,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [AppColors.blue, AppColors.brandPurple],
                 ),
+                borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
               ),
-              child: const Text('Try Again', style: TextStyle(
-                fontFamily: 'PlusJakartaSans',
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              )),
+              child: ElevatedButton(
+                onPressed: () {
+                  ref.read(assessmentProvider.notifier).reset();
+                  Future.microtask(
+                      () => ref.read(assessmentProvider.notifier).startAssessment());
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  shadowColor: Colors.transparent,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
+                  ),
+                ),
+                child: const Text('Try Again', style: TextStyle(
+                  fontFamily: 'PlusJakartaSans',
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                )),
+              ),
             ),
           ),
         ],
@@ -328,6 +386,7 @@ class _AssessmentScreenState extends ConsumerState<AssessmentScreen> {
   }
 }
 
+// ─── Progress Dots (dark) ─────────────────────────────────────────────────────
 class _ProgressDots extends StatelessWidget {
   const _ProgressDots({required this.current, required this.total});
   final int current;
@@ -342,15 +401,18 @@ class _ProgressDots extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 2),
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: i < current ? AppColors.blue : AppColors.borderMedium,
+          color: i < current
+              ? AppColors.lightPurple
+              : Colors.white.withOpacity(0.2),
         ),
       )),
     );
   }
 }
 
-class _MayaSpeechBubble extends StatelessWidget {
-  const _MayaSpeechBubble({required this.text});
+// ─── Dark Speech Bubble — matches Voice Session ───────────────────────────────
+class _DarkSpeechBubble extends StatelessWidget {
+  const _DarkSpeechBubble({required this.text});
   final String text;
 
   @override
@@ -359,32 +421,28 @@ class _MayaSpeechBubble extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: AppDimensions.lg),
       padding: const EdgeInsets.all(AppDimensions.md),
       decoration: BoxDecoration(
-        color: AppColors.bgSurface,
+        color: const Color(0xFF1A1A1F),
         borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-        border: Border.all(color: AppColors.borderSubtle),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: Border.all(color: const Color(0xFF2D2D35)),
       ),
       child: Text(
         text,
-        style: AppTypography.bodyLarge,
+        style: AppTypography.bodyLarge.copyWith(
+          color: Colors.white.withOpacity(0.9),
+        ),
         textAlign: TextAlign.center,
       ),
     );
   }
 }
 
-class _MayaThinkingBubble extends StatefulWidget {
+// ─── Dark Thinking Bubble — matches Voice Session ─────────────────────────────
+class _DarkThinkingBubble extends StatefulWidget {
   @override
-  State<_MayaThinkingBubble> createState() => _MayaThinkingBubbleState();
+  State<_DarkThinkingBubble> createState() => _DarkThinkingBubbleState();
 }
 
-class _MayaThinkingBubbleState extends State<_MayaThinkingBubble>
+class _DarkThinkingBubbleState extends State<_DarkThinkingBubble>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
@@ -411,34 +469,43 @@ class _MayaThinkingBubbleState extends State<_MayaThinkingBubble>
         horizontal: AppDimensions.md, vertical: AppDimensions.mdMinus,
       ),
       decoration: BoxDecoration(
-        color: AppColors.bgSurface,
+        color: const Color(0xFF1A1A1F),
         borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-        border: Border.all(color: AppColors.borderSubtle),
+        border: Border.all(color: const Color(0xFF2D2D35)),
       ),
       child: AnimatedBuilder(
         animation: _controller,
         builder: (_, __) => Row(
           mainAxisSize: MainAxisSize.min,
-          children: List.generate(3, (i) {
-            final opacity = ((_controller.value * 3) - i).clamp(0.0, 1.0);
-            return Container(
-              margin: const EdgeInsets.symmetric(horizontal: 3),
-              width: 7,
-              height: 7,
-              decoration: BoxDecoration(
-                color: AppColors.textTertiary.withOpacity(opacity),
-                shape: BoxShape.circle,
+          children: [
+            Text(
+              'Maya is thinking',
+              style: AppTypography.body.copyWith(
+                color: Colors.white.withOpacity(0.7),
               ),
-            );
-          }),
+            ),
+            const SizedBox(width: 8),
+            ...List.generate(3, (i) {
+              final opacity = ((_controller.value * 3) - i).clamp(0.0, 1.0);
+              return Container(
+                margin: const EdgeInsets.symmetric(horizontal: 2),
+                width: 6, height: 6,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(opacity * 0.5),
+                  shape: BoxShape.circle,
+                ),
+              );
+            }),
+          ],
         ),
       ),
     );
   }
 }
 
-class _LiveTranscriptBubble extends StatelessWidget {
-  const _LiveTranscriptBubble({required this.text});
+// ─── Dark Live Transcript — matches Voice Session ─────────────────────────────
+class _DarkTranscriptBubble extends StatelessWidget {
+  const _DarkTranscriptBubble({required this.text});
   final String text;
 
   @override
@@ -449,21 +516,24 @@ class _LiveTranscriptBubble extends StatelessWidget {
         horizontal: AppDimensions.md, vertical: AppDimensions.mdMinus,
       ),
       decoration: BoxDecoration(
-        color: AppColors.blueLight,
+        color: const Color(0xFF141420),
         borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
-        border: Border.all(color: AppColors.blue.withOpacity(0.2)),
+        border: const Border(
+          left: BorderSide(color: AppColors.blue, width: 4),
+        ),
       ),
       child: Text(
         text,
-        style: AppTypography.body.copyWith(color: AppColors.blue),
+        style: AppTypography.body.copyWith(color: Colors.white),
         textAlign: TextAlign.center,
       ),
     );
   }
 }
 
-class _MicButton extends StatelessWidget {
-  const _MicButton({
+// ─── Dark Mic Button — matches Voice Session ──────────────────────────────────
+class _DarkMicButton extends StatelessWidget {
+  const _DarkMicButton({
     required this.isListening,
     required this.isDisabled,
     required this.onTap,
@@ -485,7 +555,7 @@ class _MicButton extends StatelessWidget {
           color: isListening
               ? AppColors.error
               : isDisabled
-                  ? AppColors.bgSurface2
+                  ? AppColors.bg600
                   : AppColors.blue,
           boxShadow: isDisabled
               ? []
@@ -508,8 +578,9 @@ class _MicButton extends StatelessWidget {
   }
 }
 
-class _FallbackInput extends StatelessWidget {
-  const _FallbackInput({
+// ─── Dark Fallback Text Input ─────────────────────────────────────────────────
+class _DarkFallbackInput extends StatelessWidget {
+  const _DarkFallbackInput({
     required this.controller,
     required this.enabled,
     required this.onSubmit,
@@ -529,26 +600,30 @@ class _FallbackInput extends StatelessWidget {
             child: TextField(
               controller: controller,
               enabled: enabled,
-              style: AppTypography.bodyLarge,
+              style: AppTypography.bodyLarge.copyWith(color: Colors.white),
               textCapitalization: TextCapitalization.sentences,
               decoration: InputDecoration(
                 hintText: 'Type your answer...',
-                hintStyle: AppTypography.body.copyWith(color: AppColors.textTertiary),
+                hintStyle: AppTypography.body.copyWith(
+                  color: Colors.white.withOpacity(0.35),
+                ),
                 filled: true,
-                fillColor: AppColors.bgSurface2,
+                fillColor: const Color(0xFF1A1A1F),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(24),
-                  borderSide: const BorderSide(color: AppColors.borderSubtle),
+                  borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(24),
-                  borderSide: const BorderSide(color: AppColors.borderSubtle),
+                  borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(24),
                   borderSide: const BorderSide(color: AppColors.blue, width: 2),
                 ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16, vertical: 10,
+                ),
               ),
               onSubmitted: enabled ? (_) => onSubmit() : null,
             ),
@@ -561,7 +636,7 @@ class _FallbackInput extends StatelessWidget {
               height: 44,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: enabled ? AppColors.blue : AppColors.bgSurface2,
+                color: enabled ? AppColors.blue : AppColors.bg600,
               ),
               child: Icon(
                 Icons.arrow_upward_rounded,

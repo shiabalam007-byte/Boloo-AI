@@ -221,7 +221,7 @@ class _VoiceSessionScreenState extends ConsumerState<VoiceSessionScreen>
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        MayaAvatar(state: mayaAvatarState, size: 140),
+        MayaAvatar(state: mayaAvatarState, size: 140, showLabel: true),
         const SizedBox(height: AppDimensions.lg),
         if (!sessionStarted)
           _buildSpeechBubble('Starting session...')

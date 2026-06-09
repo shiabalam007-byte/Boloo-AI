@@ -82,9 +82,7 @@ class _AssessmentResultScreenState extends ConsumerState<AssessmentResultScreen>
             sliver: SliverList(
               delegate: SliverChildListDelegate([
                 _buildHeader(firstName),
-                const SizedBox(height: AppDimensions.xl),
-                _buildScoreRow(confidenceScore, communicationScore),
-                const SizedBox(height: AppDimensions.xl),
+                const SizedBox(height: AppDimensions.lg),
                 _buildStrengths(strengths),
                 const SizedBox(height: AppDimensions.lg),
                 _buildLockedWeaknesses(weaknesses),
