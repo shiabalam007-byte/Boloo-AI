@@ -77,3 +77,7 @@ live_verify.js
 
 # Claude Code agent worktrees (ephemeral, not project files)
 .claude/
+
+# Ephemeral visual verification screenshots
+test/current_screens_test.dart
+test/goldens/current_*.png
